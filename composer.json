@@ -14,5 +14,10 @@
         "psr-4": {
             "Neos\\RedirectHandler\\": "Classes"
         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
     }
 }
