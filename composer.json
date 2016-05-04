@@ -4,7 +4,7 @@
     "description": "Basic API to handle HTTP redirects with the Flow Framework",
     "license": "MIT",
     "require": {
-        "typo3/flow": "~3.2",
+        "typo3/flow": "~3.2 || dev-master",
         "neos/redirecthandler-storageimplementation": "~1.0"
     },
     "suggest": {
