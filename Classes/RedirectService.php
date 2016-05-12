@@ -65,6 +65,9 @@ class RedirectService
             }
             return $this->buildResponse($httpRequest, $redirect);
         } catch (\Exception $exception) {
+            if ($exception instanceof Exception) {
+                throw $exception;
+            }
             // skip triggering the redirect if there was an error accessing the database (wrong credentials, ...)
             return null;
         }
@@ -89,6 +92,10 @@ class RedirectService
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
                 'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT'
             ]));
+        } elseif ($statusCode >= 400 && $statusCode <= 599) {
+            $exception = new Exception();
+            $exception->setStatusCode($statusCode);
+            throw $exception;
         }
         return $response;
     }
