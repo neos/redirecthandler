@@ -65,6 +65,7 @@ class RedirectService
             }
             return $this->buildResponse($httpRequest, $redirect);
         } catch (\Exception $exception) {
+            // Throw exception if it's a \Neos\RedirectHandler\Exception (used for custom exception handling)
             if ($exception instanceof Exception) {
                 throw $exception;
             }
