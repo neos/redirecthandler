@@ -20,4 +20,11 @@ use TYPO3\Flow\Http;
  */
 class Exception extends Http\Exception
 {
+    /**
+     * @param integer $statusCode
+     * @return void
+     */
+    public function setStatusCode($statusCode) {
+        $this->statusCode = $statusCode;
+    }
 }
