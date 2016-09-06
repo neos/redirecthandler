@@ -55,8 +55,8 @@ class Redirect implements RedirectInterface
      */
     public function __construct($sourceUriPath, $targetUriPath, $statusCode, $host = null)
     {
-        $this->sourceUriPath = trim($sourceUriPath, '/');
-        $this->targetUriPath = trim($targetUriPath, '/');
+        $this->sourceUriPath = ltrim($sourceUriPath, '/');
+        $this->targetUriPath = ltrim($targetUriPath, '/');
         $this->statusCode = (integer)$statusCode;
         $this->host = trim($host);
     }
