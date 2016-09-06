@@ -84,20 +84,25 @@ class RedirectService
         if (headers_sent() === true && FLOW_SAPITYPE !== 'CLI') {
             return null;
         }
+
         $response = new Response();
         $statusCode = $redirect->getStatusCode();
         $response->setStatus($statusCode);
+
         if ($statusCode >= 300 && $statusCode <= 399) {
+            $location = $redirect->getTargetUriPath();
+
+            if (parse_url($location, PHP_URL_SCHEME) === null) {
+                $location = $httpRequest->getBaseUri() . $location;
+            }
+
             $response->setHeaders(new Headers([
-                'Location' => $httpRequest->getBaseUri() . $redirect->getTargetUriPath(),
+                'Location' => $location,
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
                 'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT'
             ]));
-        } elseif ($statusCode >= 400 && $statusCode <= 599) {
-            $exception = new Exception();
-            $exception->setStatusCode($statusCode);
-            throw $exception;
         }
+
         return $response;
     }
 
