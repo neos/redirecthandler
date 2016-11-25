@@ -12,12 +12,12 @@ namespace Neos\RedirectHandler;
  */
 
 use Doctrine\ORM\Mapping as ORM;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Http\Component\ComponentChain;
-use TYPO3\Flow\Http\Component\ComponentContext;
-use TYPO3\Flow\Http\Component\ComponentInterface;
-use TYPO3\Flow\Mvc\Routing\RouterCachingService;
-use TYPO3\Flow\Mvc\Routing\RoutingComponent;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Component\ComponentChain;
+use Neos\Flow\Http\Component\ComponentContext;
+use Neos\Flow\Http\Component\ComponentInterface;
+use Neos\Flow\Mvc\Routing\RouterCachingService;
+use Neos\Flow\Mvc\Routing\RoutingComponent;
 
 /**
  * Redirect HTTP Component

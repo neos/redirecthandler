@@ -12,7 +12,7 @@ namespace Neos\RedirectHandler;
  */
 
 use Doctrine\ORM\Mapping as ORM;
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * Redirect Interface

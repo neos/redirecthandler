@@ -12,11 +12,11 @@ namespace Neos\RedirectHandler;
  */
 
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Http\Headers;
-use TYPO3\Flow\Http\Request as Request;
-use TYPO3\Flow\Http\Response;
-use TYPO3\Flow\Mvc\Routing\RouterCachingService;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Headers;
+use Neos\Flow\Http\Request as Request;
+use Neos\Flow\Http\Response;
+use Neos\Flow\Mvc\Routing\RouterCachingService;
 
 /**
  * Central authority for HTTP redirects.

@@ -13,7 +13,7 @@ namespace Neos\RedirectHandler\Traits;
 
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectInterface;
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * RedirectSignal
@@ -28,7 +28,7 @@ trait RedirectSignalTrait
 
     /**
      * @Flow\Inject
-     * @var \TYPO3\Flow\Log\SystemLoggerInterface
+     * @var \Neos\Flow\Log\SystemLoggerInterface
      */
     protected $_logger;
 
