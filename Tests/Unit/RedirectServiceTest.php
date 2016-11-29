@@ -2,7 +2,7 @@
 namespace Neos\RedirectHandler\Tests\Unit;
 
 /*
- * This file is part of the TYPO3.Flow package.
+ * This file is part of the Neos.Flow package.
  *
  * (c) Contributors of the Neos Project - www.neos.io
  *
@@ -15,10 +15,10 @@ use Doctrine\DBAL\DBALException;
 use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
-use TYPO3\Flow\Http\Request;
-use TYPO3\Flow\Http\Response;
-use TYPO3\Flow\Http\Uri;
-use TYPO3\Flow\Tests\UnitTestCase;
+use Neos\Flow\Http\Request;
+use Neos\Flow\Http\Response;
+use Neos\Flow\Http\Uri;
+use Neos\Flow\Tests\UnitTestCase;
 
 /**
  * Test case for the RedirectService class

@@ -2,7 +2,7 @@
 namespace Neos\RedirectHandler\Command;
 
 /*
- * This file is part of the TYPO3.Flow package.
+ * This file is part of the Neos.Flow package.
  *
  * (c) Contributors of the Neos Project - www.neos.io
  *
@@ -17,11 +17,11 @@ use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Cli\CommandController;
-use TYPO3\Flow\Log\SystemLoggerInterface;
-use TYPO3\Flow\Persistence\PersistenceManagerInterface;
-use TYPO3\Flow\Utility\Arrays;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Cli\CommandController;
+use Neos\Flow\Log\SystemLoggerInterface;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Utility\Arrays;
 
 /**
  * Command controller for tasks related to redirects

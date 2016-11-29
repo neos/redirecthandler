@@ -11,7 +11,7 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use TYPO3\Flow\Http;
+use Neos\Flow\Http;
 
 /**
  * A generic RedirectHandler exception
