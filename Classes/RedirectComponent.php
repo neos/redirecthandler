@@ -37,6 +37,12 @@ class RedirectComponent implements ComponentInterface
     protected $redirectService;
 
     /**
+     * @Flow\InjectConfiguration(path="cancelHttpChain")
+     * @var boolean
+     */
+    protected $cancelHttpChain;
+
+    /**
      * Check if the current request match a redirect
      *
      * @param ComponentContext $componentContext
@@ -52,7 +58,9 @@ class RedirectComponent implements ComponentInterface
         $response = $this->redirectService->buildResponseIfApplicable($httpRequest);
         if ($response !== null) {
             $componentContext->replaceHttpResponse($response);
-            $componentContext->setParameter(ComponentChain::class, 'cancel', true);
+            if ($this->cancelHttpChain) {
+                $componentContext->setParameter(ComponentChain::class, 'cancel', true);
+            }
         }
     }
 }

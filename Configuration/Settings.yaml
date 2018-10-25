@@ -6,6 +6,7 @@ Neos:
     statusCode:
       redirect: 307
       gone: 410
+    cancelHttpChain: true
   Flow:
     http:
       chain:
