@@ -51,7 +51,7 @@ class RedirectComponent implements ComponentInterface
     public function handle(ComponentContext $componentContext)
     {
         $routingMatchResults = $componentContext->getParameter(RoutingComponent::class, 'matchResults');
-        if ($routingMatchResults !== NULL) {
+        if ($routingMatchResults !== null) {
             return;
         }
         $httpRequest = $componentContext->getHttpRequest();
