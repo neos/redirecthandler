@@ -85,9 +85,10 @@ class RedirectService
             return null;
         }
 
-        $response = new Response();
         $statusCode = $redirect->getStatusCode();
-        $response->setStatus($statusCode);
+
+        $response = new Response();
+        $response = $response->withStatus($statusCode);
 
         if ($statusCode >= 300 && $statusCode <= 399) {
             $location = $redirect->getTargetUriPath();
@@ -96,15 +97,41 @@ class RedirectService
                 $location = $httpRequest->getBaseUri() . $location;
             }
 
-            $response->setHeaders(new Headers([
-                'Location' => $location,
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
-                'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT'
-            ]));
+            $response = $response->withHeader('Location', $location);
+            $response = $response->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+            $response = $response->withHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
+
         } elseif ($statusCode >= 400 && $statusCode <= 599) {
-            $exception = new Exception();
-            $exception->setStatusCode($statusCode);
-            throw $exception;
+
+            $responseBody = '
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>' . $statusCode . ' Gone</title>
+                        <style type="text/css">
+                            body {
+                                font-family: Helvetica, Arial, sans-serif;
+                                margin: 50px;
+                            }
+    
+                            h1 {
+                                color: #00ADEE;
+                                font-weight: normal;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>' . $statusCode . ' Gone</h1>
+                    </body>
+                </html>';
+
+            $response = $response->withBody(
+                new \Neos\Flow\Http\ContentStream(
+                    fopen('data://text/plain,' . $responseBody,'r'),
+                    'r'
+                )
+            );
         }
 
         return $response;
