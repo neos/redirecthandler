@@ -85,10 +85,9 @@ class RedirectService
             return null;
         }
 
-        $statusCode = $redirect->getStatusCode();
-
         $response = new Response();
-        $response = $response->withStatus($statusCode);
+        $statusCode = $redirect->getStatusCode();
+        $response->setStatus($statusCode);
 
         if ($statusCode >= 300 && $statusCode <= 399) {
             $location = $redirect->getTargetUriPath();
@@ -97,11 +96,13 @@ class RedirectService
                 $location = $httpRequest->getBaseUri() . $location;
             }
 
-            $response = $response->withHeader('Location', $location);
-            $response = $response->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-            $response = $response->withHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
+            $response->setHeaders(new Headers([
+                'Location' => $location,
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+                'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT'
+            ]));
         } elseif ($statusCode >= 400 && $statusCode <= 599) {
-            $responseBody = '
+            $content = '
                 <!DOCTYPE html>
                 <html>
                     <head>
@@ -124,12 +125,7 @@ class RedirectService
                     </body>
                 </html>';
 
-            $response = $response->withBody(
-                new \Neos\Flow\Http\ContentStream(
-                    fopen('data://text/plain,' . $responseBody, 'r'),
-                    'r'
-                )
-            );
+            $response->setContent($content);
         }
 
         return $response;
