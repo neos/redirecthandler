@@ -16,6 +16,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Headers;
 use Neos\Flow\Http\Request as Request;
 use Neos\Flow\Http\Response;
+use Neos\Flow\Http\Helper\ResponseInformationHelper;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
 
 /**
@@ -102,12 +103,13 @@ class RedirectService
                 'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT'
             ]));
         } elseif ($statusCode >= 400 && $statusCode <= 599) {
+            $statusMessage = ResponseInformationHelper::getStatusMessageByCode($statusCode);
             $content = '
                 <!DOCTYPE html>
                 <html>
                     <head>
                         <meta charset="UTF-8">
-                        <title>' . $statusCode . ' Gone</title>
+                        <title>' . $statusCode . ' ' . $statusMessage . '</title>
                         <style type="text/css">
                             body {
                                 font-family: Helvetica, Arial, sans-serif;
@@ -121,7 +123,7 @@ class RedirectService
                         </style>
                     </head>
                     <body>
-                        <h1>' . $statusCode . ' Gone</h1>
+                        <h1>' . $statusCode . ' ' . $statusMessage . '</h1>
                     </body>
                 </html>';
 
