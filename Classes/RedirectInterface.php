@@ -11,14 +11,14 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use Doctrine\ORM\Mapping as ORM;
-use Neos\Flow\Annotations as Flow;
-
 /**
  * Redirect Interface
  */
 interface RedirectInterface
 {
+    const REDIRECT_TYPE_MANUAL = 'manual';
+    const REDIRECT_TYPE_GENERATED = 'generated';
+
     /**
      * @return string
      */
@@ -38,4 +38,29 @@ interface RedirectInterface
      * @return string
      */
     public function getHost();
+
+    /**
+     * @return string
+     */
+    public function getCreator();
+
+    /**
+     * @return string
+     */
+    public function getComment();
+
+    /**
+     * @return string
+     */
+    public function getType();
+
+    /**
+     * @return \DateTime
+     */
+    public function getStartDateTime();
+
+    /**
+     * @return \DateTime
+     */
+    public function getEndDateTime();
 }

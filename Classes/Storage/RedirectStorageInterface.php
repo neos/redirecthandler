@@ -10,6 +10,9 @@ namespace Neos\RedirectHandler\Storage;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
+use DateTime;
+use Generator;
 use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 
@@ -24,19 +27,19 @@ interface RedirectStorageInterface
      * @param string $sourceUriPath
      * @param string $host Full qualified host name
      * @param boolean $fallback If not redirect found, match a redirect with host value as null
-     * @return RedirectDto or NULL if no redirect exists for the given $sourceUriPath
+     * @return RedirectDto|null if no redirect exists for the given $sourceUriPath
      * @api
      */
-    public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true);
+    public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?RedirectDto;
 
     /**
      * Returns all registered redirects
      *
      * @param string $host Full qualified host name
-     * @return \Generator<RedirectDto>
+     * @return Generator<RedirectDto>
      * @api
      */
-    public function getAll($host = null);
+    public function getAll($host = null): Generator;
 
     /**
      * Return a list of all hosts
@@ -44,7 +47,7 @@ interface RedirectStorageInterface
      * @return array
      * @api
      */
-    public function getDistinctHosts();
+    public function getDistinctHosts(): array;
 
     /**
      * Removes a redirect for the given $sourceUriPath if it exists
@@ -54,7 +57,7 @@ interface RedirectStorageInterface
      * @return void
      * @api
      */
-    public function removeOneBySourceUriPathAndHost($sourceUriPath, $host = null);
+    public function removeOneBySourceUriPathAndHost($sourceUriPath, $host = null): void;
 
     /**
      * Removes all registered redirects
@@ -62,7 +65,7 @@ interface RedirectStorageInterface
      * @return void
      * @api
      */
-    public function removeAll();
+    public function removeAll(): void;
 
     /**
      * Removes all registered redirects by host
@@ -71,7 +74,7 @@ interface RedirectStorageInterface
      * @return void
      * @api
      */
-    public function removeByHost($host = null);
+    public function removeByHost($host = null): void;
 
     /**
      * Adds a redirect to the repository and updates related redirects accordingly
@@ -80,10 +83,25 @@ interface RedirectStorageInterface
      * @param string $targetUriPath the relative URI path the redirect should point to
      * @param integer $statusCode the status code of the redirect header
      * @param array $hosts list of full qualified host name
-     * @return array<Redirect> the freshly generated redirects
+     * @param string|null $creator
+     * @param string|null $comment
+     * @param string|null $type
+     * @param DateTime|null $startDateTime
+     * @param DateTime|null $endDateTime
+     * @return array<RedirectDto> the freshly generated redirects
      * @api
      */
-    public function addRedirect($sourceUriPath, $targetUriPath, $statusCode = null, array $hosts = []);
+    public function addRedirect(
+        $sourceUriPath,
+        $targetUriPath,
+        $statusCode = null,
+        array $hosts = [],
+        $creator = null,
+        $comment = null,
+        $type = null,
+        DateTime $startDateTime = null,
+        DateTime $endDateTime = null
+    ): array;
 
     /**
      * Increment the hit counter for the given redirect
@@ -92,5 +110,5 @@ interface RedirectStorageInterface
      * @return void
      * @api
      */
-    public function incrementHitCount(RedirectInterface $redirect);
+    public function incrementHitCount(RedirectInterface $redirect): void;
 }
