@@ -11,11 +11,13 @@ namespace Neos\RedirectHandler\Command;
  * source code.
  */
 
+use League\Csv\CannotInsertRecord;
 use League\Csv\Reader;
-use League\Csv\Writer;
+use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
+use Neos\RedirectHandler\Service\RedirectExportService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
@@ -47,6 +49,18 @@ class RedirectCommandController extends CommandController
      * @var SystemLoggerInterface
      */
     protected $logger;
+
+    /**
+     * @Flow\Inject
+     * @var RedirectExportService
+     */
+    protected $redirectExportService;
+
+    /**
+     * @Flow\Inject
+     * @var RedirectExportService
+     */
+    protected $redirectImportService;
 
     /**
      * List all redirects
@@ -121,28 +135,16 @@ class RedirectCommandController extends CommandController
      */
     public function exportCommand($filename = null, $host = null)
     {
-        $writer = Writer::createFromFileObject(new \SplTempFileObject());
-        if ($host !== null) {
-            $redirects = $this->redirectStorage->getAll($host);
-        } else {
-            $redirects = new \AppendIterator();
-            foreach ($this->redirectStorage->getDistinctHosts() as $host) {
-                $redirects->append($this->redirectStorage->getAll($host));
+        try {
+            $csvWriter = $this->redirectExportService->exportCsv($host);
+
+            if ($filename === null) {
+                $csvWriter->output();
+            } else {
+                file_put_contents($filename, (string)$csvWriter);
             }
-        }
-        /** @var $redirect RedirectInterface */
-        foreach ($redirects as $redirect) {
-            $writer->insertOne([
-                $redirect->getSourceUriPath(),
-                $redirect->getTargetUriPath(),
-                $redirect->getStatusCode(),
-                $redirect->getHost()
-            ]);
-        }
-        if ($filename === null) {
-            $writer->output();
-        } else {
-            file_put_contents($filename, (string)$writer);
+        } catch (CannotInsertRecord $e) {
+            $this->logger->log(vsprintf('Redirect export error, host=%s', [$host]), LOG_ERR);
         }
     }
 
