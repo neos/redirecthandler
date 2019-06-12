@@ -113,8 +113,7 @@ class RedirectCommandController extends CommandController
      *
      * This command will export all redirects in CSV format. You can set a preferred
      * filename before the export with the optional ``filename`` argument. If no ``filename`` argument is supplied, the
-     * export will be returned within the CLI. This operation requires the package ``league/csv``. Install it by running
-     * ``composer require league/csv``.
+     * export will be returned within the CLI.
      *
      * @param string $filename (optional) The filename for the CSV file
      * @param string $host (optional) Only export hosts for a specified host
@@ -122,9 +121,6 @@ class RedirectCommandController extends CommandController
      */
     public function exportCommand($filename = null, $host = null)
     {
-        if (!class_exists(Writer::class)) {
-            $this->outputWarningForLeagueCsvPackage();
-        }
         $writer = Writer::createFromFileObject(new \SplTempFileObject());
         if ($host !== null) {
             $redirects = $this->redirectStorage->getAll($host);
@@ -170,9 +166,6 @@ class RedirectCommandController extends CommandController
     {
         $hasErrors = false;
         $this->outputLine();
-        if (!class_exists(Reader::class)) {
-            $this->outputWarningForLeagueCsvPackage();
-        }
         if (!is_readable($filename)) {
             $this->outputLine('<error>Sorry, but the file "%s" is not readable or does not exist...</error>', [$filename]);
             $this->outputLine();
@@ -258,20 +251,6 @@ class RedirectCommandController extends CommandController
     }
 
     /**
-     * @return void
-     */
-    protected function outputWarningForLeagueCsvPackage()
-    {
-        $this->outputLine();
-        $this->outputLine('<info>Import/Export</info> features require the package <b>league/csv</b>');
-        $this->outputLine();
-        $this->outputLine('Open your shell and launch:');
-        $this->outputLine('# <comment>composer require league/csv</comment>');
-        $this->outputLine();
-        $this->sendAndExit(1);
-    }
-
-    /**
      * Remove a single redirect
      *
      * This command is used the delete a single redirect. The redirect is identified by the ``source`` argument.
@@ -280,6 +259,7 @@ class RedirectCommandController extends CommandController
      * @param string $source The source URI path of the redirect to remove, as given by ``redirect:list``
      * @param string $host (optional) Only remove redirects that use this host
      * @return void
+     * @throws StopActionException
      */
     public function removeCommand($source, $host = null)
     {
