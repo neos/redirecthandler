@@ -11,9 +11,12 @@ namespace Neos\RedirectHandler\Tests\Functional;
  * source code.
  */
 
+use DateInterval;
+use DateTime;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
 use Neos\RedirectHandler\Exception;
-use Neos\RedirectHandler\RedirectService;
+use Neos\RedirectHandler\RedirectInterface;
+use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Tests\FunctionalTestCase;
 
 /**
@@ -27,9 +30,9 @@ class RedirectTests extends FunctionalTestCase
     protected static $testablePersistenceEnabled = true;
 
     /**
-     * @var RedirectService
+     * @var RedirectStorageInterface
      */
-    protected $redirectService;
+    protected $redirectStorage;
 
     /**
      * @var RedirectRepository
@@ -42,7 +45,7 @@ class RedirectTests extends FunctionalTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->redirectService = $this->objectManager->get(RedirectService::class);
+        $this->redirectStorage = $this->objectManager->get(RedirectStorageInterface::class);
         $this->redirectRepository = $this->objectManager->get(RedirectRepository::class);
     }
 
@@ -52,10 +55,11 @@ class RedirectTests extends FunctionalTestCase
     public function addRedirectTrimsLeadingAndTrailingSlashesOfSourceAndTargetPath()
     {
         $this->assertEquals(0, $this->redirectRepository->countAll());
-        $this->redirectService->addRedirect('/some/source/path/', '/some/target/path/');
+        $this->redirectStorage->addRedirect('/some/source/path/', '/some/target/path/');
 
         $this->persistenceManager->persistAll();
-        $redirect = $this->redirectRepository->findAll()->getFirst();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
 
         $this->assertSame('some/source/path', $redirect->getSourceUriPath());
         $this->assertSame('some/target/path', $redirect->getTargetUriPath());
@@ -67,10 +71,11 @@ class RedirectTests extends FunctionalTestCase
     public function addRedirectSetsTheCorrectDefaultStatusCode()
     {
         $this->assertEquals(0, $this->redirectRepository->countAll());
-        $this->redirectService->addRedirect('some/source/path', 'some/target/path');
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path');
 
         $this->persistenceManager->persistAll();
-        $redirect = $this->redirectRepository->findAll()->getFirst();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
 
         $this->assertSame(301, $redirect->getStatusCode());
     }
@@ -81,12 +86,91 @@ class RedirectTests extends FunctionalTestCase
     public function addRedirectRespectsTheGivenStatusCode()
     {
         $this->assertEquals(0, $this->redirectRepository->countAll());
-        $this->redirectService->addRedirect('some/source/path', 'some/target/path', 123);
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path', 123);
 
         $this->persistenceManager->persistAll();
-        $redirect = $this->redirectRepository->findAll()->getFirst();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
 
         $this->assertSame(123, $redirect->getStatusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectRespectsTheGivenCreator()
+    {
+        $this->assertEquals(0, $this->redirectRepository->countAll());
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path', 123, [], 'Seb');
+
+        $this->persistenceManager->persistAll();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
+
+        $this->assertSame('Seb', $redirect->getCreator());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectRespectsTheGivenComment()
+    {
+        $this->assertEquals(0, $this->redirectRepository->countAll());
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path', 123, [], null, 'Important');
+
+        $this->persistenceManager->persistAll();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
+
+        $this->assertSame('Important', $redirect->getComment());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectWithoutTypeUseDefaultType()
+    {
+        $this->assertEquals(0, $this->redirectRepository->countAll());
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path', 123);
+
+        $this->persistenceManager->persistAll();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
+
+        $this->assertSame(RedirectInterface::REDIRECT_TYPE_GENERATED, $redirect->getType());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectRespectsTheGivenType()
+    {
+        $this->assertEquals(0, $this->redirectRepository->countAll());
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path', 123, [], null, null, RedirectInterface::REDIRECT_TYPE_MANUAL);
+
+        $this->persistenceManager->persistAll();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
+
+        $this->assertSame(RedirectInterface::REDIRECT_TYPE_MANUAL, $redirect->getType());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectRespectsTheGivenStartAndEndDate()
+    {
+        $start = new DateTime();
+        $end = (new DateTime())->add(new DateInterval('P1D'));
+        $this->assertEquals(0, $this->redirectRepository->countAll());
+        $this->redirectStorage->addRedirect('some/source/path', 'some/target/path', 123, [], null, null, RedirectInterface::REDIRECT_TYPE_MANUAL, $start, $end);
+
+        $this->persistenceManager->persistAll();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
+
+        $this->assertSame($start, $redirect->getStartDateTime());
+        $this->assertSame($end, $redirect->getEndDateTime());
     }
 
     /**
@@ -95,11 +179,11 @@ class RedirectTests extends FunctionalTestCase
      */
     public function addRedirectThrowsExceptionIfARedirectExistsForTheGivenSourceUriPath()
     {
-        $this->redirectService->addRedirect('a', 'b');
-        $this->redirectService->addRedirect('c', 'd');
+        $this->redirectStorage->addRedirect('a', 'b');
+        $this->redirectStorage->addRedirect('c', 'd');
         $this->persistenceManager->persistAll();
 
-        $this->redirectService->addRedirect('c', 'e');
+        $this->redirectStorage->addRedirect('c', 'e');
     }
 
     /**
@@ -108,11 +192,11 @@ class RedirectTests extends FunctionalTestCase
      */
     public function addRedirectThrowsExceptionIfARedirectExistsForTheGivenTargetUriPath()
     {
-        $this->redirectService->addRedirect('a', 'b');
-        $this->redirectService->addRedirect('c', 'd');
+        $this->redirectStorage->addRedirect('a', 'b');
+        $this->redirectStorage->addRedirect('c', 'd');
         $this->persistenceManager->persistAll();
 
-        $this->redirectService->addRedirect('b', 'c');
+        $this->redirectStorage->addRedirect('b', 'c');
     }
 
     /**
@@ -120,11 +204,11 @@ class RedirectTests extends FunctionalTestCase
      */
     public function addRedirectDoesNotThrowAnExceptionIfARedirectReversesAnExistingRedirect()
     {
-        $this->redirectService->addRedirect('a', 'b');
-        $this->redirectService->addRedirect('c', 'd');
+        $this->redirectStorage->addRedirect('a', 'b');
+        $this->redirectStorage->addRedirect('c', 'd');
         $this->persistenceManager->persistAll();
 
-        $this->redirectService->addRedirect('d', 'c');
+        $this->redirectStorage->addRedirect('d', 'c');
         $this->persistenceManager->persistAll();
 
         $expectedRedirects = ['a' => 'b', 'd' => 'c'];
@@ -200,12 +284,12 @@ class RedirectTests extends FunctionalTestCase
     public function addRedirectTests(array $existingRedirects, array $newRedirects, array $expectedRedirects)
     {
         foreach ($existingRedirects as $sourceUriPath => $targetUriPath) {
-            $this->redirectService->addRedirect($sourceUriPath, $targetUriPath);
+            $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath);
         }
         $this->persistenceManager->persistAll();
 
         foreach ($newRedirects as $sourceUriPath => $targetUriPath) {
-            $this->redirectService->addRedirect($sourceUriPath, $targetUriPath);
+            $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath);
         }
         $this->persistenceManager->persistAll();
 
