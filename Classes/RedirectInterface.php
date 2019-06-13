@@ -11,6 +11,8 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
+use DateTime;
+
 /**
  * Redirect Interface
  */
@@ -55,12 +57,12 @@ interface RedirectInterface
     public function getType();
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getStartDateTime();
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getEndDateTime();
 }

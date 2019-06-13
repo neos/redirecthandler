@@ -11,7 +11,6 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use Doctrine\ORM\Mapping as ORM;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Component\ComponentChain;
 use Neos\Flow\Http\Component\ComponentContext;
@@ -41,6 +40,7 @@ class RedirectComponent implements ComponentInterface
      *
      * @param ComponentContext $componentContext
      * @return void
+     * @throws Exception
      */
     public function handle(ComponentContext $componentContext)
     {

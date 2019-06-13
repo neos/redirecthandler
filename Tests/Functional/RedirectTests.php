@@ -12,6 +12,7 @@ namespace Neos\RedirectHandler\Tests\Functional;
  */
 
 use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
+use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectService;
 use Neos\Flow\Tests\FunctionalTestCase;
 
@@ -90,7 +91,7 @@ class RedirectTests extends FunctionalTestCase
 
     /**
      * @test
-     * @expectedException \Neos\RedirectHandler\Exception
+     * @expectedException Exception
      */
     public function addRedirectThrowsExceptionIfARedirectExistsForTheGivenSourceUriPath()
     {
@@ -103,7 +104,7 @@ class RedirectTests extends FunctionalTestCase
 
     /**
      * @test
-     * @expectedException \Neos\RedirectHandler\Exception
+     * @expectedException Exception
      */
     public function addRedirectThrowsExceptionIfARedirectExistsForTheGivenTargetUriPath()
     {

@@ -51,9 +51,10 @@ class RedirectService
      *
      * @param Request $httpRequest
      * @return Response|null
+     * @throws Exception
      * @api
      */
-    public function buildResponseIfApplicable(Request $httpRequest)
+    public function buildResponseIfApplicable(Request $httpRequest): ?Response
     {
         try {
             $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($httpRequest->getRelativePath(), $httpRequest->getBaseUri()->getHost());
@@ -78,8 +79,9 @@ class RedirectService
      * @param Request $httpRequest
      * @param RedirectInterface $redirect
      * @return Response|null
+     * @throws Exception
      */
-    protected function buildResponse(Request $httpRequest, RedirectInterface $redirect)
+    protected function buildResponse(Request $httpRequest, RedirectInterface $redirect): ?Response
     {
         if (headers_sent() === true && FLOW_SAPITYPE !== 'CLI') {
             return null;
@@ -118,7 +120,7 @@ class RedirectService
      * @Flow\Signal
      * @api
      */
-    public function emitRedirectCreated(RedirectInterface $redirect)
+    public function emitRedirectCreated(RedirectInterface $redirect): void
     {
     }
 }

@@ -11,9 +11,11 @@ namespace Neos\RedirectHandler\Traits;
  * source code.
  */
 
+use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
+use Neos\RedirectHandler\RedirectService;
 
 /**
  * RedirectSignal
@@ -22,13 +24,13 @@ trait RedirectSignalTrait
 {
     /**
      * @Flow\Inject
-     * @var \Neos\RedirectHandler\RedirectService
+     * @var RedirectService
      */
     protected $_redirectService;
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Log\SystemLoggerInterface
+     * @var SystemLoggerInterface
      */
     protected $_logger;
 
@@ -37,7 +39,7 @@ trait RedirectSignalTrait
      * @return void
      * @throws Exception
      */
-    public function emitRedirectCreated(array $redirects)
+    public function emitRedirectCreated(array $redirects): void
     {
         foreach ($redirects as $redirect) {
             if (!$redirect instanceof RedirectInterface) {
