@@ -11,6 +11,7 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
+use DateTime;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Headers;
@@ -59,6 +60,10 @@ class RedirectService
         try {
             $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($httpRequest->getRelativePath(), $httpRequest->getBaseUri()->getHost());
             if ($redirect === null) {
+                return null;
+            }
+            $now = new DateTime();
+            if (($redirect->getStartDateTime() && $redirect->getStartDateTime() > $now) || ($redirect->getEndDateTime() && $redirect->getEndDateTime() < $now)) {
                 return null;
             }
             if (isset($this->featureSwitch['hitCounter']) && $this->featureSwitch['hitCounter'] === true) {
