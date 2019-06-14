@@ -30,6 +30,16 @@ You can enable it again in your Settings:
         features:
           hitCounter: true
           
+The default status codes for redirects has been changed from 307 to 301 as 
+mostly permanent redirects are desired instead of temporary.
+
+You can enable the old behavior in your Settings:
+
+    Neos:
+      RedirectHandler:
+        statusCode:
+          redirect: 307
+          
 ## Configuration
 
 **Note**: When using this to handle redirects for persistent resources, you must adjust the default
