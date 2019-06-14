@@ -2,7 +2,7 @@
 Neos:
   RedirectHandler:
     features:
-      hitCounter: true
+      hitCounter: false
     statusCode:
       redirect: 307
       gone: 410
