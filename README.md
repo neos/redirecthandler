@@ -14,6 +14,10 @@ To use the redirect package, you have to install this package
 and additionally a storage package. A default one for storing redirects in the database can be installed using composer with 
 
 	composer require "neos/redirecthandler-databasestorage"
+	
+### Using this package with Neos CMS
+
+Check out the [adapter package for Neos](https://github.com/neos/redirecthandler-neosadapter).
 
 ## Configuration
 
