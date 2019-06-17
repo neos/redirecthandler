@@ -24,7 +24,8 @@ class Exception extends Http\Exception
      * @param integer $statusCode
      * @return void
      */
-    public function setStatusCode($statusCode) {
+    public function setStatusCode($statusCode)
+    {
         $this->statusCode = $statusCode;
     }
 }
