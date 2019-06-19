@@ -12,18 +12,17 @@ namespace Neos\RedirectHandler\Command;
  */
 
 use League\Csv\CannotInsertRecord;
+use League\Csv\Exception as CsvException;
 use League\Csv\Reader;
 use Neos\Flow\Mvc\Exception\StopActionException;
-use Neos\RedirectHandler\Exception;
-use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Service\RedirectExportService;
+use Neos\RedirectHandler\Service\RedirectImportService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Neos\Utility\Arrays;
 
 /**
  * Command controller for tasks related to redirects
@@ -58,7 +57,7 @@ class RedirectCommandController extends CommandController
 
     /**
      * @Flow\Inject
-     * @var RedirectExportService
+     * @var RedirectImportService
      */
     protected $redirectImportService;
 
@@ -72,7 +71,7 @@ class RedirectCommandController extends CommandController
      * @param string $match (optional) A string to match for the ``source`` or the ``target``
      * @return void
      */
-    public function listCommand($host = null, $match = null)
+    public function listCommand($host = null, $match = null): void
     {
         $outputByHost = function ($host = null) use ($match) {
             $redirects = $this->redirectStorage->getAll($host);
@@ -134,7 +133,7 @@ class RedirectCommandController extends CommandController
      * @param bool $includeHeader Add line with column names as first line
      * @return void
      */
-    public function exportCommand($filename = null, $host = null, $includeHeader = true)
+    public function exportCommand($filename = null, $host = null, $includeHeader = true): void
     {
         try {
             $csvWriter = $this->redirectExportService->exportCsv($host, $includeHeader);
@@ -163,9 +162,11 @@ class RedirectCommandController extends CommandController
      * the import. Be aware that this will also delete all automatically generated redirects.
      *
      * @param string $filename CSV file path
+     * @param string $delimiter
      * @return void
+     * @throws CsvException
      */
-    public function importCommand($filename)
+    public function importCommand($filename, $delimiter = ','): void
     {
         $hasErrors = false;
         $this->outputLine();
@@ -177,57 +178,30 @@ class RedirectCommandController extends CommandController
         $this->outputLine('<b>Import redirects from "%s"</b>', [$filename]);
         $this->outputLine();
         $reader = Reader::createFromPath($filename);
-        $counter = 0;
-        foreach ($reader as $index => $row) {
-            $skipped = false;
-            list($sourceUriPath, $targetUriPath, $statusCode, $hosts) = $row;
-            $hosts = Arrays::trimExplode('|', $hosts);
-            if ($hosts === []) {
-                $hosts = [null];
-            }
-            $forcePersist = false;
-            foreach ($hosts as $key => $host) {
-                $host = trim($host);
-                $host = $host === '' ? null : $host;
-                $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourceUriPath, $host);
-                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $redirect);
-                if ($redirect !== null && $isSame === false) {
-                    $this->outputRedirectLine('<info>--</info>', $redirect);
-                    $this->redirectStorage->removeOneBySourceUriPathAndHost($sourceUriPath, $host);
-                    $forcePersist = true;
-                } elseif ($isSame === true) {
-                    $this->outputRedirectLine('<comment>~~</comment>', $redirect);
-                    unset($hosts[$key]);
-                    $skipped = true;
-                }
-            }
-            if ($skipped === true && $hosts === []) {
-                continue;
-            }
-            if ($forcePersist) {
-                $this->persistenceManager->persistAll();
-            }
-            try {
-                $redirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts);
-                /** @var Redirect $redirect */
-                foreach ($redirects as $redirect) {
-                    $this->outputRedirectLine('<info>++</info>', $redirect);
-                    $messageArguments = [$redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode(), $redirect->getHost() ?: 'all host'];
-                    $this->logger->log(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LOG_ERR);
-                }
-                $this->persistenceManager->persistAll();
-            } catch (Exception $exception) {
-                $messageArguments = [$sourceUriPath, $targetUriPath, $statusCode, $hosts ? json_encode($hosts) : 'all host'];
-                $this->outputLine('   <error>!!</error> %s => %s <comment>(%d)</comment> - %s', $messageArguments);
-                $this->outputLine('      Message: %s', [$exception->getMessage()]);
-                $this->logger->log(vsprintf('Redirect import error, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LOG_ERR);
-                $this->logger->logException($exception);
-                $hasErrors = true;
-            }
-            $counter++;
-            if ($counter % 50 === 0) {
-                $this->persistenceManager->persistAll();
-                $this->persistenceManager->clearState();
+        $reader->setDelimiter($delimiter);
+        $protocol = $this->redirectImportService->import($reader->getIterator());
+        foreach ($protocol as $entry) {
+            switch ($entry['type']) {
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_CREATED:
+                    $this->outputRedirectLine('<info>++</info>', $entry['redirect']);
+                    break;
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_DELETED:
+                    $this->outputRedirectLine('<info>--</info>', $entry['redirect']);
+                    break;
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_UNCHANGED:
+                    $this->outputRedirectLine('<comment>~~</comment>', $entry['redirect']);
+                    break;
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR:
+                    $hasErrors = true;
+                    if ($entry['arguments']) {
+                        $this->outputLine('   <error>!!</error> %s => %s <comment>(%d)</comment> - %s', $entry['arguments']);
+                        $this->outputLine('      Message: %s', [$entry['message']]);
+                    } else {
+                        $this->outputLine('   <error>!!</error> ' . $entry['message']);
+                    }
+                    break;
+                default:
+                    $this->outputLine('<info>!!</info> Undefined protocol entry with type ' . $entry['type']);
             }
         }
         $this->outputLine();
@@ -243,9 +217,9 @@ class RedirectCommandController extends CommandController
      * @param string $targetUriPath
      * @param string $host
      * @param integer $statusCode
-     * @return boolean
+     * @return bool
      */
-    protected function isSame($sourceUriPath, $targetUriPath, $host, $statusCode, RedirectInterface $redirect = null)
+    protected function isSame($sourceUriPath, $targetUriPath, $host, $statusCode, RedirectInterface $redirect = null): bool
     {
         if ($redirect === null) {
             return false;
@@ -264,7 +238,7 @@ class RedirectCommandController extends CommandController
      * @return void
      * @throws StopActionException
      */
-    public function removeCommand($source, $host = null)
+    public function removeCommand($source, $host = null): void
     {
         $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($source, $host);
         if ($redirect === null) {
@@ -282,7 +256,7 @@ class RedirectCommandController extends CommandController
      *
      * @return void
      */
-    public function removeAllCommand()
+    public function removeAllCommand(): void
     {
         $this->redirectStorage->removeAll();
         $this->outputLine('Removed all redirects');
@@ -297,7 +271,7 @@ class RedirectCommandController extends CommandController
      * @param string $host Fully qualified host name or `all` to delete redirects valid for all hosts
      * @return void
      */
-    public function removeByHostCommand($host)
+    public function removeByHostCommand($host): void
     {
         if ($host === 'all') {
             $this->redirectStorage->removeByHost(null);
@@ -323,7 +297,7 @@ class RedirectCommandController extends CommandController
      * @param boolean $force Replace existing redirect (based on the source URI)
      * @return void
      */
-    public function addCommand($source, $target, $statusCode, $host = null, $force = false)
+    public function addCommand($source, $target, $statusCode, $host = null, $force = false): void
     {
         $this->outputLine();
         $this->outputLine('<b>Create a redirect ...</b>');
@@ -360,7 +334,7 @@ class RedirectCommandController extends CommandController
      * @param RedirectInterface $redirect
      * @return void
      */
-    protected function outputRedirectLine($prefix, RedirectInterface $redirect)
+    protected function outputRedirectLine($prefix, RedirectInterface $redirect): void
     {
         $this->outputLine('   %s %s <info>=></info> %s <comment>(%d)</comment> - %s', [
             $prefix,
@@ -374,7 +348,7 @@ class RedirectCommandController extends CommandController
     /**
      * @return void
      */
-    protected function outputLegend()
+    protected function outputLegend(): void
     {
         $this->outputLine('<b>Legend</b>');
         $this->outputLine();
