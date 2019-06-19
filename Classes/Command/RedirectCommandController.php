@@ -131,12 +131,13 @@ class RedirectCommandController extends CommandController
      *
      * @param string $filename (optional) The filename for the CSV file
      * @param string $host (optional) Only export hosts for a specified host
+     * @param bool $includeHeader Add line with column names as first line
      * @return void
      */
-    public function exportCommand($filename = null, $host = null)
+    public function exportCommand($filename = null, $host = null, $includeHeader = true)
     {
         try {
-            $csvWriter = $this->redirectExportService->exportCsv($host);
+            $csvWriter = $this->redirectExportService->exportCsv($host, $includeHeader);
 
             if ($filename === null) {
                 $csvWriter->output();

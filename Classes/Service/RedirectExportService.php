@@ -37,21 +37,41 @@ class RedirectExportService
      * Export redirects to a CSV object than can then be used to write a file or print the content
      *
      * @param string $host (optional) Only export hosts for a specified host
+     * @param bool $includeHeader will a header line with column names as first line when true
      * @return Writer
      * @throws CannotInsertRecord
      */
-    public function exportCsv($host = null): Writer
+    public function exportCsv($host = null, $includeHeader = true): Writer
     {
         $writer = Writer::createFromFileObject(new SplTempFileObject());
         $redirects = $this->getRedirects($host);
 
-        /** @var $redirect RedirectInterface */
+        if ($includeHeader) {
+            $writer->insertOne([
+                'Source Uri',
+                'Target Uri',
+                'Status Code',
+                'Host',
+                'Start DateTime',
+                'End DateTime',
+                'Comment',
+                'Creator',
+                'Type',
+            ]);
+        }
+
+        /** @var RedirectInterface $redirect  */
         foreach ($redirects as $redirect) {
             $writer->insertOne([
                 $redirect->getSourceUriPath(),
                 $redirect->getTargetUriPath(),
                 $redirect->getStatusCode(),
-                $redirect->getHost()
+                $redirect->getHost(),
+                $redirect->getStartDateTime() ? $redirect->getStartDateTime()->format('Y-m-d-H-i-s') : '',
+                $redirect->getEndDateTime() ? $redirect->getEndDateTime()->format('Y-m-d-H-i-s') : '',
+                $redirect->getComment(),
+                $redirect->getCreator(),
+                $redirect->getType(),
             ]);
         }
 
@@ -62,9 +82,9 @@ class RedirectExportService
      * Retrieves all redirects or only the redirects for a given host
      *
      * @param string $host
-     * @return Generator<RedirectInterface>
+     * @return Generator<RedirectInterface>|AppendIterator
      */
-    protected function getRedirects($host = null): Generator
+    protected function getRedirects($host = null)
     {
         if ($host !== null) {
             $redirects = $this->redirectStorage->getAll($host);
@@ -74,7 +94,7 @@ class RedirectExportService
                 $redirects->append($this->redirectStorage->getAll($host));
             }
         }
-        yield $redirects;
+        return $redirects;
     }
 }
 
