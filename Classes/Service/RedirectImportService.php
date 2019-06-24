@@ -16,7 +16,6 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\RedirectHandler\Exception;
-use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Utility\Arrays;
@@ -73,7 +72,7 @@ class RedirectImportService
 
             list($sourceUriPath, $targetUriPath, $statusCode, $hosts, $startDateTime, $endDateTime, $comment, $creator, $type) = $row;
 
-            // Check for headline
+            // Skip first line with headers
             if ($counter === 0 && $sourceUriPath === 'Source Uri') {
                 continue;
             }
@@ -121,7 +120,7 @@ class RedirectImportService
             try {
                 $redirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts,
                     $creator, $comment, $type, $startDateTime, $endDateTime);
-                /** @var Redirect $redirect */
+                /** @var RedirectInterface $redirect */
                 foreach ($redirects as $redirect) {
                     $protocol[] = ['type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_CREATED, 'redirect' => $redirect];
                     $messageArguments = [

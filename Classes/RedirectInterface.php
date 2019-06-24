@@ -24,45 +24,48 @@ interface RedirectInterface
     /**
      * @return string
      */
-    public function getSourceUriPath();
+    public function getSourceUriPath(): string;
 
     /**
      * @return string
      */
-    public function getTargetUriPath();
+    public function getTargetUriPath(): string;
 
     /**
-     * @return integer
+     * @return int
      */
-    public function getStatusCode();
+    public function getStatusCode(): int;
+
+    /**
+     * @return null|string
+     */
+    public function getHost(): ?string;
+
+    /**
+     * @return null|string
+     */
+    public function getCreator(): ?string;
+
+    /**
+     * @return null|string
+     */
+    public function getComment(): ?string;
 
     /**
      * @return string
      */
-    public function getHost();
+    public function getType(): string;
 
     /**
-     * @return string
+     * @return null|DateTime
      */
-    public function getCreator();
+    public function getStartDateTime(): ?DateTime;
 
     /**
-     * @return string
+     * @return null|DateTime
      */
-    public function getComment();
+    public function getEndDateTime(): ?DateTime;
 
     /**
-     * @return string
      */
-    public function getType();
-
-    /**
-     * @return DateTime
-     */
-    public function getStartDateTime();
-
-    /**
-     * @return DateTime
-     */
-    public function getEndDateTime();
 }
