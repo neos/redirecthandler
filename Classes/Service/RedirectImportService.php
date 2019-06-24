@@ -11,6 +11,7 @@ namespace Neos\RedirectHandler\Service;
  * source code.
  */
 
+use DateTime;
 use Iterator;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\SystemLoggerInterface;
@@ -60,8 +61,9 @@ class RedirectImportService
         $protocol = [];
         foreach ($iterator as $index => $row) {
             $skipped = false;
+            $columnCount = count($row);
 
-            if ($counter === 0 && count($row) < 4) {
+            if ($counter === 0 && $columnCount < 3) {
                 $protocol[] = [
                     'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
                     'arguments' => [],
@@ -70,31 +72,45 @@ class RedirectImportService
                 break;
             }
 
-            list($sourceUriPath, $targetUriPath, $statusCode, $hosts, $startDateTime, $endDateTime, $comment, $creator, $type) = $row;
+            if ($columnCount < 3) {
+                $protocol[] = [
+                    'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
+                    'message' => 'Row skipped as it has not all required fields set: ' . join(',', $row)
+                ];
+                continue;
+            }
+
+            [
+                $sourceUriPath,
+                $targetUriPath,
+                $statusCode,
+            ] = $row;
 
             // Skip first line with headers
             if ($counter === 0 && $sourceUriPath === 'Source Uri') {
                 continue;
             }
 
-            // Set defaults for empty values
-            if (empty($startDateTime)) {
-                $startDateTime = null;
-            }
-            if (empty($endDateTime)) {
-                $endDateTime = null;
-            }
-            if (empty($creator)) {
-                $creator = 'CLI';
-            }
-            if (empty($type)) {
-                $type = RedirectInterface::REDIRECT_TYPE_MANUAL;
-            }
+            // Retrieve field by field if csv doesn't have all columns
+            $hosts = isset($row[4]) && !empty($row[4]) ? $row[4] : '';
+            $startDateTime = isset($row[5]) && !empty($row[5]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[5]) : null;
+            $endDateTime = isset($row[6]) && !empty($row[6]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[6]) : null;
+            $comment = isset($row[7]) && !empty($row[7]) ? $row[7] : null;
+            $creator = isset($row[8]) && !empty($row[8]) ? $row[8] : 'imported';
+            $type = isset($row[9]) && !empty($row[9]) ? $row[9] : RedirectInterface::REDIRECT_TYPE_MANUAL;
 
             $hosts = Arrays::trimExplode('|', $hosts);
             if ($hosts === []) {
                 $hosts = [null];
             }
+
+            if (!$startDateTime instanceof DateTime) {
+                 $startDateTime = null;
+            }
+            if (!$endDateTime instanceof DateTime) {
+                 $endDateTime = null;
+            }
+
             $forcePersist = false;
             foreach ($hosts as $key => $host) {
                 $host = trim($host);
@@ -166,8 +182,13 @@ class RedirectImportService
      * @param integer $statusCode
      * @return bool
      */
-    protected function isSame($sourceUriPath, $targetUriPath, $host, $statusCode, RedirectInterface $redirect = null): bool
-    {
+    protected function isSame(
+        $sourceUriPath,
+        $targetUriPath,
+        $host,
+        $statusCode,
+        RedirectInterface $redirect = null
+    ): bool {
         if ($redirect === null) {
             return false;
         }
