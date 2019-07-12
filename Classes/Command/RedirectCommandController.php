@@ -136,7 +136,7 @@ class RedirectCommandController extends CommandController
     public function exportCommand($filename = null, $host = null, $includeHeader = true): void
     {
         try {
-            $csvWriter = $this->redirectExportService->exportCsv($host, $includeHeader);
+            $csvWriter = $this->redirectExportService->exportCsv($host, false, null, $includeHeader);
 
             if ($filename === null) {
                 $csvWriter->output();

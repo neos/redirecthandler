@@ -37,14 +37,16 @@ class RedirectExportService
      * Export redirects to a CSV object than can then be used to write a file or print the content
      *
      * @param string $host (optional) Only export hosts for a specified host
+     * @param bool $onlyActive will filter inactive redirects based on start and end datetime if true
+     * @param null|string $type will filter redirects based on their type
      * @param bool $includeHeader will a header line with column names as first line when true
      * @return Writer
      * @throws CannotInsertRecord
      */
-    public function exportCsv($host = null, $includeHeader = true): Writer
+    public function exportCsv($host = null, $onlyActive = false, $type = null, $includeHeader = true): Writer
     {
         $writer = Writer::createFromFileObject(new SplTempFileObject());
-        $redirects = $this->getRedirects($host);
+        $redirects = $this->getRedirects($host, $onlyActive, $type);
 
         if ($includeHeader) {
             $writer->insertOne([
@@ -60,7 +62,7 @@ class RedirectExportService
             ]);
         }
 
-        /** @var RedirectInterface $redirect  */
+        /** @var RedirectInterface $redirect */
         foreach ($redirects as $redirect) {
             $writer->insertOne([
                 $redirect->getSourceUriPath(),
@@ -82,9 +84,11 @@ class RedirectExportService
      * Retrieves all redirects or only the redirects for a given host
      *
      * @param string $host
+     * @param bool $onlyActive will filter inactive redirects based on start and end datetime if true
+     * @param null|string $type will filter redirects based on their type
      * @return Generator<RedirectInterface>|AppendIterator
      */
-    protected function getRedirects($host = null)
+    protected function getRedirects($host = null, $onlyActive = false, $type = null)
     {
         if ($host !== null) {
             $redirects = $this->redirectStorage->getAll($host);
