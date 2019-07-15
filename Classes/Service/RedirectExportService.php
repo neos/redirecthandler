@@ -88,7 +88,7 @@ class RedirectExportService
      * @param null|string $type will filter redirects based on their type
      * @return Generator<RedirectInterface>|AppendIterator
      */
-    protected function getRedirects($host = null, $onlyActive = false, $type = null)
+    public function getRedirects($host = null, $onlyActive = false, $type = null)
     {
         if ($host !== null) {
             $redirects = $this->redirectStorage->getAll($host);
