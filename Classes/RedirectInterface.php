@@ -65,7 +65,4 @@ interface RedirectInterface
      * @return null|DateTime
      */
     public function getEndDateTime(): ?DateTime;
-
-    /**
-     */
 }
