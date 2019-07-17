@@ -135,6 +135,8 @@ class RedirectImportService
             }
             try {
                 $redirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts,
+                $statusCode = intval($statusCode);
+
                     $creator, $comment, $type, $startDateTime, $endDateTime);
                 /** @var RedirectInterface $redirect */
                 foreach ($redirects as $redirect) {
