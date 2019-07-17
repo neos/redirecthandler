@@ -36,10 +36,12 @@ interface RedirectStorageInterface
      * Returns all registered redirects
      *
      * @param string $host Full qualified host name
+     * @param bool $onlyActive Filters redirects which start and end datetime don't match the current datetime
+     * @param string|null $type Filters redirects by their type
      * @return Generator<RedirectDto>
      * @api
      */
-    public function getAll($host = null): Generator;
+    public function getAll($host = null, $onlyActive = false, $type = null): Generator;
 
     /**
      * Return a list of all hosts
