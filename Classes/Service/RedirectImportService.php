@@ -16,6 +16,7 @@ use Iterator;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Flow\Security\Context as SecurityContext;
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
@@ -52,6 +53,12 @@ class RedirectImportService
     protected $logger;
 
     /**
+     * @Flow\Inject
+     * @var SecurityContext
+     */
+    protected $securityContext;
+
+    /**
      * @param Iterator $iterator
      * @return array
      */
@@ -59,6 +66,10 @@ class RedirectImportService
     {
         $counter = 0;
         $protocol = [];
+
+        $authenticatedAccount = $this->securityContext->getAccount();
+        $currentUserIdentifier = $authenticatedAccount !== null ? $authenticatedAccount->getAccountIdentifier() : 'cli';
+
         foreach ($iterator as $index => $row) {
             $skipped = false;
             $columnCount = count($row);
@@ -134,12 +145,15 @@ class RedirectImportService
                 $this->persistenceManager->persistAll();
             }
             try {
-                $redirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts,
                 $statusCode = intval($statusCode);
 
+                // Set creator to current user if the redirect has changed
+                $creator = $currentUserIdentifier;
+
+                $changedRedirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts,
                     $creator, $comment, $type, $startDateTime, $endDateTime);
                 /** @var RedirectInterface $redirect */
-                foreach ($redirects as $redirect) {
+                foreach ($changedRedirects as $redirect) {
                     $protocol[] = ['type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_CREATED, 'redirect' => $redirect];
                     $messageArguments = [
                         $redirect->getSourceUriPath(),
