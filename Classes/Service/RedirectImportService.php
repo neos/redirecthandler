@@ -68,7 +68,7 @@ class RedirectImportService
         $protocol = [];
 
         $authenticatedAccount = $this->securityContext->getAccount();
-        $currentUserIdentifier = $authenticatedAccount !== null ? $authenticatedAccount->getAccountIdentifier() : 'cli';
+        $currentUserIdentifier = $authenticatedAccount !== null ? $authenticatedAccount->getAccountIdentifier() : 'imported';
 
         foreach ($iterator as $index => $row) {
             $skipped = false;
@@ -103,12 +103,11 @@ class RedirectImportService
             }
 
             // Retrieve field by field if csv doesn't have all columns
-            $hosts = isset($row[4]) && !empty($row[4]) ? $row[4] : '';
-            $startDateTime = isset($row[5]) && !empty($row[5]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[5]) : null;
-            $endDateTime = isset($row[6]) && !empty($row[6]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[6]) : null;
-            $comment = isset($row[7]) && !empty($row[7]) ? $row[7] : null;
-            $creator = isset($row[8]) && !empty($row[8]) ? $row[8] : 'imported';
-            $type = isset($row[9]) && !empty($row[9]) ? $row[9] : RedirectInterface::REDIRECT_TYPE_MANUAL;
+            $hosts = isset($row[3]) && !empty($row[3]) ? $row[3] : '';
+            $startDateTime = isset($row[4]) && !empty($row[4]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[4]) : null;
+            $endDateTime = isset($row[5]) && !empty($row[5]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[5]) : null;
+            $comment = isset($row[6]) && !empty($row[6]) ? $row[6] : null;
+            $type = isset($row[8]) && !empty($row[8]) ? $row[8] : RedirectInterface::REDIRECT_TYPE_MANUAL;
 
             $hosts = Arrays::trimExplode('|', $hosts);
             if ($hosts === []) {
@@ -124,10 +123,9 @@ class RedirectImportService
 
             $forcePersist = false;
             foreach ($hosts as $key => $host) {
-                $host = trim($host);
-                $host = $host === '' ? null : $host;
+                $host = empty($host) ? null : $host;
                 $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourceUriPath, $host);
-                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $redirect);
+                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $startDateTime, $endDateTime, $comment, $redirect);
                 if ($redirect !== null && $isSame === false) {
                     $protocol[] = ['type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_DELETED, 'redirect' => $redirect];
                     $this->redirectStorage->removeOneBySourceUriPathAndHost($sourceUriPath, $host);
@@ -191,11 +189,14 @@ class RedirectImportService
     }
 
     /**
-     * @param RedirectInterface $redirect
      * @param string $sourceUriPath
      * @param string $targetUriPath
      * @param string $host
      * @param integer $statusCode
+     * @param DateTime|null $startDateTime
+     * @param DateTime|null $endDateTime
+     * @param string $comment
+     * @param RedirectInterface $redirect
      * @return bool
      */
     protected function isSame(
@@ -203,13 +204,18 @@ class RedirectImportService
         $targetUriPath,
         $host,
         $statusCode,
+        DateTime $startDateTime = null,
+        DateTime $endDateTime = null,
+        $comment = null,
         RedirectInterface $redirect = null
     ): bool {
         if ($redirect === null) {
             return false;
         }
         return $redirect->getSourceUriPath() === $sourceUriPath && $redirect->getTargetUriPath() === $targetUriPath
-            && $redirect->getHost() === $host && $redirect->getStatusCode() === (integer)$statusCode;
+            && $redirect->getHost() === $host && $redirect->getStatusCode() === (integer)$statusCode
+            && $redirect->getStartDateTime() == $startDateTime && $redirect->getEndDateTime() == $endDateTime
+            && $redirect->getComment() === $comment;
     }
 }
 
