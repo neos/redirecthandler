@@ -59,6 +59,12 @@ class RedirectImportService
     protected $securityContext;
 
     /**
+     * @Flow\InjectConfiguration(path="validation", package="Neos.RedirectHandler")
+     * @var array
+     */
+    protected $validationOptions;
+
+    /**
      * @param Iterator $iterator
      * @return array
      */
@@ -119,6 +125,23 @@ class RedirectImportService
             }
             if (!$endDateTime instanceof DateTime) {
                  $endDateTime = null;
+            }
+
+            if (!preg_match($this->validationOptions['path'], $sourceUriPath)) {
+                $protocol[] = [
+                    'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
+                    'arguments' => [],
+                    'message' => 'Source path "' . $sourceUriPath . '" does not have a valid format'
+                ];
+                continue;
+            }
+            if (!preg_match($this->validationOptions['path'], $targetUriPath)) {
+                $protocol[] = [
+                    'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
+                    'arguments' => [],
+                    'message' => 'Target path "' . $targetUriPath . '"  does not have a valid format'
+                ];
+                continue;
             }
 
             $forcePersist = false;

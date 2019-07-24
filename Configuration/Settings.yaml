@@ -7,7 +7,7 @@ Neos:
       redirect: 307
       gone: 410
     validation:
-      path: '/^[a-z0-9\-\/]+$/i'
+      path: '/^[a-z0-9\-\/\.]+$/i'
   Flow:
     http:
       chain:
