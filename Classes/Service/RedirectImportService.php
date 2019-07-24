@@ -73,7 +73,7 @@ class RedirectImportService
         $counter = 0;
         $protocol = [];
 
-        $authenticatedAccount = $this->securityContext->getAccount();
+        $authenticatedAccount = $this->securityContext->canBeInitialized() ? $this->securityContext->getAccount() : null;
         $currentUserIdentifier = $authenticatedAccount !== null ? $authenticatedAccount->getAccountIdentifier() : 'imported';
 
         foreach ($iterator as $index => $row) {
