@@ -127,19 +127,11 @@ class RedirectImportService
                  $endDateTime = null;
             }
 
-            if (!preg_match($this->validationOptions['path'], $sourceUriPath)) {
+            if (!preg_match($this->validationOptions['sourceUriPath'], $sourceUriPath)) {
                 $protocol[] = [
                     'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
                     'arguments' => [],
                     'message' => 'Source path "' . $sourceUriPath . '" does not have a valid format'
-                ];
-                continue;
-            }
-            if (!preg_match($this->validationOptions['path'], $targetUriPath)) {
-                $protocol[] = [
-                    'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
-                    'arguments' => [],
-                    'message' => 'Target path "' . $targetUriPath . '"  does not have a valid format'
                 ];
                 continue;
             }
