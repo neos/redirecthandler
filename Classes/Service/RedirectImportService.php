@@ -34,6 +34,8 @@ class RedirectImportService
     const REDIRECT_IMPORT_MESSAGE_TYPE_UNCHANGED = 'unchanged';
     const REDIRECT_IMPORT_MESSAGE_TYPE_ERROR = 'error';
 
+    const REDIRECT_EXPORT_DATETIME_FORMAT = 'Y-m-d-H-i-s';
+
     /**
      * @Flow\Inject
      * @var RedirectStorageInterface
@@ -110,8 +112,8 @@ class RedirectImportService
 
             // Retrieve field by field if csv doesn't have all columns
             $hosts = isset($row[3]) && !empty($row[3]) ? $row[3] : '';
-            $startDateTime = isset($row[4]) && !empty($row[4]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[4]) : null;
-            $endDateTime = isset($row[5]) && !empty($row[5]) ? DateTime::createFromFormat('Y-m-d-H-i-s', $row[5]) : null;
+            $rawStartDateTime = isset($row[4]) && !empty($row[4]) ? $row[4] : null;
+            $rawEndDateTime = isset($row[5]) && !empty($row[5]) ? $row[5] : null;
             $comment = isset($row[6]) && !empty($row[6]) ? $row[6] : null;
             $type = isset($row[8]) && !empty($row[8]) ? $row[8] : RedirectInterface::REDIRECT_TYPE_MANUAL;
 
@@ -120,11 +122,32 @@ class RedirectImportService
                 $hosts = [null];
             }
 
-            if (!$startDateTime instanceof DateTime) {
-                 $startDateTime = null;
+            if ($rawStartDateTime !== null) {
+                $startDateTime = DateTime::createFromFormat(self::REDIRECT_EXPORT_DATETIME_FORMAT, $rawStartDateTime);
+                if (!$startDateTime instanceof DateTime) {
+                    $protocol[] = [
+                        'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
+                        'arguments' => [],
+                        'message' => 'Start date time "' . $rawStartDateTime . '" does not match the format "' . self::REDIRECT_EXPORT_DATETIME_FORMAT . '"'
+                    ];
+                    continue;
+                }
+            } else {
+                $startDateTime = null;
             }
-            if (!$endDateTime instanceof DateTime) {
-                 $endDateTime = null;
+
+            if ($rawEndDateTime !== null) {
+                $endDateTime = DateTime::createFromFormat(self::REDIRECT_EXPORT_DATETIME_FORMAT, $rawEndDateTime);
+                if (!$endDateTime instanceof DateTime) {
+                    $protocol[] = [
+                        'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
+                        'arguments' => [],
+                        'message' => 'End date time "' . $rawEndDateTime . '" does not match the format "' . self::REDIRECT_EXPORT_DATETIME_FORMAT . '"'
+                    ];
+                    continue;
+                }
+            } else {
+                $endDateTime = null;
             }
 
             if (!preg_match($this->validationOptions['sourceUriPath'], $sourceUriPath)) {
@@ -140,7 +163,8 @@ class RedirectImportService
             foreach ($hosts as $key => $host) {
                 $host = empty($host) ? null : $host;
                 $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourceUriPath, $host);
-                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $startDateTime, $endDateTime, $comment, $redirect);
+                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $startDateTime,
+                    $endDateTime, $comment, $redirect);
                 if ($redirect !== null && $isSame === false) {
                     $protocol[] = ['type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_DELETED, 'redirect' => $redirect];
                     $this->redirectStorage->removeOneBySourceUriPathAndHost($sourceUriPath, $host);
@@ -163,7 +187,8 @@ class RedirectImportService
                 // Set creator to current user if the redirect has changed
                 $creator = $currentUserIdentifier;
 
-                $changedRedirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts,
+                $changedRedirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode,
+                    $hosts,
                     $creator, $comment, $type, $startDateTime, $endDateTime);
                 /** @var RedirectInterface $redirect */
                 foreach ($changedRedirects as $redirect) {
