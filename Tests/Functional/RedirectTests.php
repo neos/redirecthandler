@@ -52,7 +52,7 @@ class RedirectTests extends FunctionalTestCase
     /**
      * @test
      */
-    public function addRedirectTrimsLeadingAndTrailingSlashesOfSourceAndTargetPath()
+    public function addRedirectTrimsLeadingAndTrailingSlashesOfSourcePath()
     {
         $this->assertEquals(0, $this->redirectRepository->countAll());
         $this->redirectStorage->addRedirect('/some/source/path/', '/some/target/path/');
@@ -62,7 +62,21 @@ class RedirectTests extends FunctionalTestCase
         $redirect = $this->redirectRepository->findAll()->current();
 
         $this->assertSame('some/source/path', $redirect->getSourceUriPath());
-        $this->assertSame('some/target/path', $redirect->getTargetUriPath());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectTrimsLeadingSlashesOfTargetPath()
+    {
+        $this->assertEquals(0, $this->redirectRepository->countAll());
+        $this->redirectStorage->addRedirect('/some/source/path/', '/some/target/path/');
+
+        $this->persistenceManager->persistAll();
+        /** @var RedirectInterface $redirect */
+        $redirect = $this->redirectRepository->findAll()->current();
+
+        $this->assertSame('some/target/path/', $redirect->getTargetUriPath());
     }
 
     /**
