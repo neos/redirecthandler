@@ -118,12 +118,12 @@ class Redirect implements RedirectInterface
      * @param null $creator name of the person who created the redirect
      * @param null $comment textual description of the redirect
      * @param null $type
-     * @param DateTime|null $startDateTime
-     * @param DateTime|null $endDateTime
-     * @param DateTime|null $creationDateTime
-     * @param DateTime|null $lastModificationDateTime
+     * @param DateTimeInterface|null $startDateTime
+     * @param DateTimeInterface|null $endDateTime
+     * @param DateTimeInterface|null $creationDateTime
+     * @param DateTimeInterface|null $lastModificationDateTime
      * @param int $hitCounter
-     * @param DateTime|null $lastHit
+     * @param DateTimeInterface|null $lastHit
      */
     public function __construct(
         $sourceUriPath,
@@ -133,12 +133,12 @@ class Redirect implements RedirectInterface
         $creator = null,
         $comment = null,
         $type = null,
-        DateTime $startDateTime = null,
-        DateTime $endDateTime = null,
-        DateTime $creationDateTime = null,
-        DateTime $lastModificationDateTime = null,
+        DateTimeInterface $startDateTime = null,
+        DateTimeInterface $endDateTime = null,
+        DateTimeInterface $creationDateTime = null,
+        DateTimeInterface $lastModificationDateTime = null,
         $hitCounter = 0,
-        DateTime $lastHit = null
+        DateTimeInterface $lastHit = null
     ) {
         $this->sourceUriPath = ltrim($sourceUriPath, '/');
         $this->targetUriPath = ltrim($targetUriPath, '/');
