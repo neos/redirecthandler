@@ -217,7 +217,7 @@ class RedirectCommandController extends CommandController
                 foreach ($redirects as $redirect) {
                     $this->outputRedirectLine('<info>++</info>', $redirect);
                     $messageArguments = [$redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode(), $redirect->getHost() ?: 'all host'];
-                    $this->logger->log(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LOG_ERR);
+                    $this->logger->log(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments));
                 }
                 $this->persistenceManager->persistAll();
             } catch (Exception $exception) {
