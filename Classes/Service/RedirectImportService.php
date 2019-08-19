@@ -34,7 +34,7 @@ class RedirectImportService
     const REDIRECT_IMPORT_MESSAGE_TYPE_UNCHANGED = 'unchanged';
     const REDIRECT_IMPORT_MESSAGE_TYPE_ERROR = 'error';
 
-    const REDIRECT_EXPORT_DATETIME_FORMAT = 'Y-m-d-H-i-s';
+    const REDIRECT_EXPORT_DATETIME_FORMAT = 'c';
 
     /**
      * @Flow\Inject

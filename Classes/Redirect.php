@@ -283,15 +283,24 @@ class Redirect implements RedirectInterface
             'sourceUriPath' => $this->getSourceUriPath(),
             'targetUriPath' => $this->getTargetUriPath(),
             'statusCode' => $this->getStatusCode(),
-            'startDateTime' => $this->getStartDateTime() ? $this->getStartDateTime()->format('Y-m-d H:i:s') : '',
-            'endDateTime' => $this->getEndDateTime() ? $this->getEndDateTime()->format('Y-m-d H:i:s') : '',
+            'startDateTime' => $this->getStartDateTime() ? $this->formatDateTimeForSerialization($this->getStartDateTime()) : '',
+            'endDateTime' => $this->getEndDateTime() ? $this->formatDateTimeForSerialization($this->getEndDateTime()) : '',
             'comment' => $this->getComment(),
             'creator' => $this->getCreator(),
             'type' => $this->getType(),
             'hitCounter' => $this->getHitCounter(),
-            'lastHit' => $this->getLastHit() ? $this->getLastHit()->format('Y-m-d H:i:s') : '',
-            'creationDateTime' => $this->getCreationDateTime() ? $this->getCreationDateTime()->format('Y-m-d H:i:s') : '',
-            'lastModificationDateTime' => $this->getLastModificationDateTime() ? $this->getLastModificationDateTime()->format('Y-m-d H:i:s') : '',
+            'lastHit' => $this->getLastHit() ? $this->getLastHit()->format(DATETIME::W3C) : '',
+            'creationDateTime' => $this->getCreationDateTime() ? $this->formatDateTimeForSerialization($this->getCreationDateTime()) : '',
+            'lastModificationDateTime' => $this->getLastModificationDateTime() ? $this->formatDateTimeForSerialization($this->getLastModificationDateTime()) : '',
         ];
+    }
+
+    /**
+     * @param DateTimeInterface $dateTime
+     * @return string|null
+     */
+    protected function formatDateTimeForSerialization(DateTimeInterface $dateTime): ?string
+    {
+        return $dateTime ? $dateTime->format(DATETIME::W3C) : null;
     }
 }
