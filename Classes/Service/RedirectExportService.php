@@ -101,4 +101,3 @@ class RedirectExportService
         return $redirects;
     }
 }
-

@@ -258,4 +258,3 @@ class RedirectImportService
             && $redirect->getComment() === $comment;
     }
 }
-
