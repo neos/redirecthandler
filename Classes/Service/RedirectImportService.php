@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\Service;
 
 /*
- * This file is part of the Neos.Flow package.
+ * This file is part of the Neos.RedirectHandler package.
  *
  * (c) Contributors of the Neos Project - www.neos.io
  *

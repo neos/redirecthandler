@@ -297,7 +297,7 @@ class RedirectCommandController extends CommandController
      * @param boolean $force Replace existing redirect (based on the source URI)
      * @return void
      */
-    public function addCommand($source, $target, $statusCode, $host = null, $force = false): void
+    public function addCommand(string $source, string $target, int $statusCode, ?string $host = null, bool $force = false): void
     {
         $this->outputLine();
         $this->outputLine('<b>Create a redirect ...</b>');
@@ -334,7 +334,7 @@ class RedirectCommandController extends CommandController
      * @param RedirectInterface $redirect
      * @return void
      */
-    protected function outputRedirectLine($prefix, RedirectInterface $redirect): void
+    protected function outputRedirectLine(string $prefix, RedirectInterface $redirect): void
     {
         $this->outputLine('   %s %s <info>=></info> %s <comment>(%d)</comment> - %s', [
             $prefix,

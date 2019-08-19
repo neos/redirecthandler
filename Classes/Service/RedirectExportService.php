@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\Service;
 
 /*
- * This file is part of the Neos.Flow package.
+ * This file is part of the Neos.RedirectHandler package.
  *
  * (c) Contributors of the Neos Project - www.neos.io
  *
@@ -43,7 +45,7 @@ class RedirectExportService
      * @return Writer
      * @throws CannotInsertRecord
      */
-    public function exportCsv($host = null, $onlyActive = false, $type = null, $includeHeader = true): Writer
+    public function exportCsv(?string $host = null, bool $onlyActive = false, ?string $type = null, bool $includeHeader = true): Writer
     {
         $writer = Writer::createFromFileObject(new SplTempFileObject());
         $redirects = $this->getRedirects($host, $onlyActive, $type);
@@ -88,7 +90,7 @@ class RedirectExportService
      * @param null|string $type will filter redirects based on their type
      * @return Generator<RedirectInterface>|AppendIterator
      */
-    public function getRedirects($host = null, $onlyActive = false, $type = null)
+    public function getRedirects(?string $host = null, bool $onlyActive = false, ?string $type = null)
     {
         if ($host !== null) {
             $redirects = $this->redirectStorage->getAll($host, $onlyActive, $type);
