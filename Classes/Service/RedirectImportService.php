@@ -244,18 +244,18 @@ class RedirectImportService
      * @param integer $statusCode
      * @param DateTime|null $startDateTime
      * @param DateTime|null $endDateTime
-     * @param string $comment
+     * @param string|null $comment
      * @param RedirectInterface $redirect
      * @return bool
      */
     protected function isSame(
-        $sourceUriPath,
-        $targetUriPath,
-        $host,
-        $statusCode,
+        string $sourceUriPath,
+        string $targetUriPath,
+        ?string $host,
+        int $statusCode,
         DateTime $startDateTime = null,
         DateTime $endDateTime = null,
-        $comment = null,
+        ?string $comment = null,
         RedirectInterface $redirect = null
     ): bool {
         if ($redirect === null) {

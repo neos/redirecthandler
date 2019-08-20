@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\Storage;
 
 /*
@@ -83,7 +85,7 @@ interface RedirectStorageInterface
      *
      * @param string $sourceUriPath the relative URI path that should trigger a redirect
      * @param string $targetUriPath the relative URI path the redirect should point to
-     * @param integer $statusCode the status code of the redirect header
+     * @param int $statusCode the status code of the redirect header
      * @param array $hosts list of full qualified host name
      * @param string|null $creator
      * @param string|null $comment
@@ -94,13 +96,13 @@ interface RedirectStorageInterface
      * @api
      */
     public function addRedirect(
-        $sourceUriPath,
-        $targetUriPath,
-        $statusCode = null,
+        string $sourceUriPath,
+        string $targetUriPath,
+        int $statusCode = null,
         array $hosts = [],
-        $creator = null,
-        $comment = null,
-        $type = null,
+        string $creator = null,
+        string $comment = null,
+        string $type = null,
         DateTime $startDateTime = null,
         DateTime $endDateTime = null
     ): array;

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\Command;
 
 /*
@@ -129,11 +131,11 @@ class RedirectCommandController extends CommandController
      * export will be returned within the CLI.
      *
      * @param string $filename (optional) The filename for the CSV file
-     * @param string $host (optional) Only export hosts for a specified host
+     * @param string|null $host (optional) Only export hosts for a specified host
      * @param bool $includeHeader Add line with column names as first line
      * @return void
      */
-    public function exportCommand($filename = null, $host = null, $includeHeader = true): void
+    public function exportCommand(string $filename = null, ?string $host = null, bool $includeHeader = true): void
     {
         try {
             $csvWriter = $this->redirectExportService->exportCsv($host, false, null, $includeHeader);
@@ -166,7 +168,7 @@ class RedirectCommandController extends CommandController
      * @return void
      * @throws CsvException
      */
-    public function importCommand($filename, $delimiter = ','): void
+    public function importCommand(string $filename, string $delimiter = ','): void
     {
         $hasErrors = false;
         $this->outputLine();
@@ -219,7 +221,7 @@ class RedirectCommandController extends CommandController
      * @param integer $statusCode
      * @return bool
      */
-    protected function isSame($sourceUriPath, $targetUriPath, $host, $statusCode, RedirectInterface $redirect = null): bool
+    protected function isSame(string $sourceUriPath, string $targetUriPath, string $host, int $statusCode, RedirectInterface $redirect = null): bool
     {
         if ($redirect === null) {
             return false;
@@ -238,7 +240,7 @@ class RedirectCommandController extends CommandController
      * @return void
      * @throws StopActionException
      */
-    public function removeCommand($source, $host = null): void
+    public function removeCommand(string $source, ?string $host = null): void
     {
         $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($source, $host);
         if ($redirect === null) {
@@ -271,7 +273,7 @@ class RedirectCommandController extends CommandController
      * @param string $host Fully qualified host name or `all` to delete redirects valid for all hosts
      * @return void
      */
-    public function removeByHostCommand($host): void
+    public function removeByHostCommand(string $host): void
     {
         if ($host === 'all') {
             $this->redirectStorage->removeByHost(null);

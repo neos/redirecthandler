@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler;
 
 /*
@@ -113,11 +115,11 @@ class Redirect implements RedirectInterface
     /**
      * @param string $sourceUriPath relative URI path for which a redirect should be triggered
      * @param string $targetUriPath target URI path to which a redirect should be pointed
-     * @param integer $statusCode status code to be send with the redirect header
+     * @param int $statusCode status code to be send with the redirect header
      * @param string $host Full qualified host name to match the redirect
-     * @param null $creator name of the person who created the redirect
-     * @param null $comment textual description of the redirect
-     * @param null $type
+     * @param string|null $creator name of the person who created the redirect
+     * @param string|null $comment textual description of the redirect
+     * @param string|null $type
      * @param DateTimeInterface|null $startDateTime
      * @param DateTimeInterface|null $endDateTime
      * @param DateTimeInterface|null $creationDateTime
@@ -126,24 +128,24 @@ class Redirect implements RedirectInterface
      * @param DateTimeInterface|null $lastHit
      */
     public function __construct(
-        $sourceUriPath,
-        $targetUriPath,
-        $statusCode,
-        $host = null,
-        $creator = null,
-        $comment = null,
-        $type = null,
+        string $sourceUriPath,
+        string $targetUriPath,
+        int $statusCode,
+        ?string $host = null,
+        ?string $creator = null,
+        ?string $comment = null,
+        ?string $type = null,
         DateTimeInterface $startDateTime = null,
         DateTimeInterface $endDateTime = null,
         DateTimeInterface $creationDateTime = null,
         DateTimeInterface $lastModificationDateTime = null,
-        $hitCounter = 0,
+        int $hitCounter = 0,
         DateTimeInterface $lastHit = null
     ) {
         $this->sourceUriPath = ltrim($sourceUriPath, '/');
         $this->targetUriPath = ltrim($targetUriPath, '/');
         $this->statusCode = (integer)$statusCode;
-        $this->host = trim($host);
+        $this->host = is_string($host) ? trim($host) : $host;
         $this->creator = $creator;
         $this->comment = $comment;
         $this->startDateTime = $startDateTime;
@@ -198,7 +200,7 @@ class Redirect implements RedirectInterface
      */
     public function getHost(): ?string
     {
-        return trim($this->host) === '' ? null : $this->host;
+        return $this->host === '' ? null : $this->host;
     }
 
     /**
@@ -258,7 +260,7 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getHitCounter(): int
     {
