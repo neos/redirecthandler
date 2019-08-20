@@ -32,7 +32,7 @@ interface RedirectStorageInterface
      * @return RedirectInterface|null if no redirect exists for the given $sourceUriPath
      * @api
      */
-    public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?RedirectInterface;
+    public function getOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null, bool $fallback = true): ?RedirectInterface;
 
     /**
      * Returns all registered redirects
@@ -43,7 +43,7 @@ interface RedirectStorageInterface
      * @return Generator<RedirectDto>
      * @api
      */
-    public function getAll($host = null, $onlyActive = false, $type = null): Generator;
+    public function getAll(string $host = null, bool $onlyActive = false, ?string $type = null): Generator;
 
     /**
      * Return a list of all hosts
@@ -61,7 +61,7 @@ interface RedirectStorageInterface
      * @return void
      * @api
      */
-    public function removeOneBySourceUriPathAndHost($sourceUriPath, $host = null): void;
+    public function removeOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null): void;
 
     /**
      * Removes all registered redirects
@@ -78,7 +78,7 @@ interface RedirectStorageInterface
      * @return void
      * @api
      */
-    public function removeByHost($host = null): void;
+    public function removeByHost(?string $host = null): void;
 
     /**
      * Adds a redirect to the repository and updates related redirects accordingly
@@ -100,9 +100,9 @@ interface RedirectStorageInterface
         string $targetUriPath,
         int $statusCode = null,
         array $hosts = [],
-        string $creator = null,
-        string $comment = null,
-        string $type = null,
+        ?string $creator = null,
+        ?string $comment = null,
+        ?string $type = null,
         DateTime $startDateTime = null,
         DateTime $endDateTime = null
     ): array;
