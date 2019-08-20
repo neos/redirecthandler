@@ -16,13 +16,14 @@ namespace Neos\RedirectHandler\Service;
 use DateTime;
 use Iterator;
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Log\SystemLoggerInterface;
+use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Security\Context as SecurityContext;
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Utility\Arrays;
+use Psr\Log\LoggerInterface;
 
 /**
  * This service allows exporting redirects
@@ -52,9 +53,15 @@ class RedirectImportService
 
     /**
      * @Flow\Inject
-     * @var SystemLoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @Flow\Inject
+     * @var ThrowableStorageInterface
+     */
+    protected $throwableStorage;
 
     /**
      * @Flow\Inject
@@ -201,8 +208,8 @@ class RedirectImportService
                         $redirect->getStatusCode(),
                         $redirect->getHost() ?: 'all hosts'
                     ];
-                    $this->logger->log(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s',
-                        $messageArguments), LOG_ERR);
+                    $this->logger->error(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s',
+                        $messageArguments));
                 }
                 $this->persistenceManager->persistAll();
             } catch (Exception $exception) {
@@ -217,9 +224,9 @@ class RedirectImportService
                     'arguments' => $messageArguments,
                     'message' => $exception->getMessage()
                 ];
-                $this->logger->log(vsprintf('Redirect import error, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s',
-                    $messageArguments), LOG_ERR);
-                $this->logger->logException($exception);
+                $this->logger->error(vsprintf('Redirect import error, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s',
+                    $messageArguments));
+                $this->throwableStorage->logThrowable($exception);
             }
             $counter++;
             if ($counter % 50 === 0) {

@@ -21,8 +21,8 @@ use Neos\RedirectHandler\Service\RedirectImportService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
-use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Command controller for tasks related to redirects
@@ -45,7 +45,7 @@ class RedirectCommandController extends CommandController
 
     /**
      * @Flow\Inject
-     * @var SystemLoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -144,7 +144,7 @@ class RedirectCommandController extends CommandController
                 file_put_contents($filename, (string)$csvWriter);
             }
         } catch (CannotInsertRecord $e) {
-            $this->logger->log(vsprintf('Redirect export error, host=%s', [$host]), LOG_ERR);
+            $this->logger->error(vsprintf('Redirect export error, host=%s', [$host]));
         }
     }
 
