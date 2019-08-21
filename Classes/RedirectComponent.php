@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler;
 
 /*
@@ -11,7 +13,6 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use Doctrine\ORM\Mapping as ORM;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Component\ComponentChain;
 use Neos\Flow\Http\Component\ComponentContext;
@@ -41,11 +42,12 @@ class RedirectComponent implements ComponentInterface
      *
      * @param ComponentContext $componentContext
      * @return void
+     * @throws Exception
      */
     public function handle(ComponentContext $componentContext)
     {
         $routingMatchResults = $componentContext->getParameter(RoutingComponent::class, 'matchResults');
-        if ($routingMatchResults !== NULL) {
+        if ($routingMatchResults !== null) {
             return;
         }
         $httpRequest = $componentContext->getHttpRequest();

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler;
 
 /*
@@ -21,10 +23,11 @@ use Neos\Flow\Http;
 class Exception extends Http\Exception
 {
     /**
-     * @param integer $statusCode
+     * @param int $statusCode
      * @return void
      */
-    public function setStatusCode($statusCode) {
+    public function setStatusCode(int $statusCode): void
+    {
         $this->statusCode = $statusCode;
     }
 }

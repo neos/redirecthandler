@@ -6,6 +6,8 @@ Neos:
     statusCode:
       redirect: 307
       gone: 410
+    validation:
+      sourceUriPath: '/^[a-z0-9\-\/\.]+$/i'
   Flow:
     http:
       chain:
