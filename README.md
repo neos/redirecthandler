@@ -1,4 +1,6 @@
 # Flow redirect handler
+[![Latest Stable Version](https://poser.pugx.org/neos/redirecthandler/v/stable)](https://packagist.org/packages/neos/redirecthandler)
+[![License](https://poser.pugx.org/neos/redirecthandler/license)](https://packagist.org/packages/neos/redirecthandler)
 
 The Neos.RedirectHandler package for Flow allows to create redirects that will be returned to the client.
 
