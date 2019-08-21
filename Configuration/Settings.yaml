@@ -2,9 +2,9 @@
 Neos:
   RedirectHandler:
     features:
-      hitCounter: true
+      hitCounter: false
     statusCode:
-      redirect: 307
+      redirect: 301
       gone: 410
     validation:
       sourceUriPath: '/^[a-z0-9\-\/\.]+$/i'

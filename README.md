@@ -19,6 +19,27 @@ and additionally a storage package. A default one for storing redirects in the d
 
 Check out the [adapter package for Neos](https://github.com/neos/redirecthandler-neosadapter).
 
+### Upgrading from 2.x
+
+The hit counter has been disabled by default.
+
+You can enable it again in your Settings:
+
+    Neos:
+      RedirectHandler:
+        features:
+          hitCounter: true
+          
+The default status codes for redirects has been changed from 307 to 301 as 
+mostly permanent redirects are desired instead of temporary.
+
+You can enable the old behavior in your Settings:
+
+    Neos:
+      RedirectHandler:
+        statusCode:
+          redirect: 307
+          
 ## Configuration
 
 **Note**: When using this to handle redirects for persistent resources, you must adjust the default
