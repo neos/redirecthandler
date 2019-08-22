@@ -35,15 +35,25 @@ interface RedirectStorageInterface
     public function getOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null, bool $fallback = true): ?RedirectInterface;
 
     /**
-     * Returns all registered redirects
+     * Returns all registered redirects matching the given parameters
      *
-     * @param string $host Full qualified host name
+     * @param string $host Full qualified host name, a value of `null` will not filter the host and return all
      * @param bool $onlyActive Filters redirects which start and end datetime don't match the current datetime
      * @param string|null $type Filters redirects by their type
      * @return Generator<RedirectDto>
      * @api
      */
     public function getAll(string $host = null, bool $onlyActive = false, ?string $type = null): Generator;
+
+    /**
+     * Returns all registered redirects without a host and matching the given parameters
+     *
+     * @param bool $onlyActive Filters redirects which start and end datetime don't match the current datetime
+     * @param string|null $type Filters redirects by their type
+     * @return Generator<RedirectDto>
+     * @api
+     */
+    public function getAllWithoutHost(bool $onlyActive = false, ?string $type = null): Generator;
 
     /**
      * Return a list of all hosts

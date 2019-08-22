@@ -76,7 +76,7 @@ class RedirectCommandController extends CommandController
     public function listCommand($host = null, $match = null): void
     {
         $outputByHost = function ($host = null) use ($match) {
-            $redirects = $this->redirectStorage->getAll($host);
+            $redirects = $host === null ? $this->redirectStorage->getAllWithoutHost() : $this->redirectStorage->getAll($host);
             $this->outputLine();
             if ($host !== null) {
                 $this->outputLine('<info>==</info> <b>Redirect for %s</b>', [$host]);
@@ -131,7 +131,7 @@ class RedirectCommandController extends CommandController
      * export will be returned within the CLI.
      *
      * @param string $filename (optional) The filename for the CSV file
-     * @param string|null $host (optional) Only export hosts for a specified host
+     * @param string|null $host (optional) Only export redirects for a specified host
      * @param bool $includeHeader Add line with column names as first line
      * @return void
      */

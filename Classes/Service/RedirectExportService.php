@@ -92,14 +92,6 @@ class RedirectExportService
      */
     public function getRedirects(?string $host = null, bool $onlyActive = false, ?string $type = null)
     {
-        if ($host !== null) {
-            $redirects = $this->redirectStorage->getAll($host, $onlyActive, $type);
-        } else {
-            $redirects = new AppendIterator();
-            foreach ($this->redirectStorage->getDistinctHosts() as $host) {
-                $redirects->append($this->redirectStorage->getAll($host, $onlyActive, $type));
-            }
-        }
-        return $redirects;
+        return $this->redirectStorage->getAll($host, $onlyActive, $type);
     }
 }
