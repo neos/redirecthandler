@@ -54,3 +54,21 @@ webserver directly:
 For the redirect handler to even see the request, this has to be removed. Usually the performance impact
 can be neglected, since Flow is only hit for resources that once existed and to which someone still holds
 a link.
+
+### What to do when redirects are not triggered but other controller actions
+
+Override the routing order like this:
+
+    Neos:
+      Flow:
+        http:
+          chain:
+            process:
+              chain:
+                redirect:
+                  position: 'before routing'
+                  
+Be careful when using this configuration, as this will make the redirect 
+component act first before any other route is resolved and could for 
+example prevent a login or similar.
+                   
