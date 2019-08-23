@@ -123,6 +123,7 @@ class RedirectImportService
             $rawEndDateTime = isset($row[5]) && !empty($row[5]) ? $row[5] : null;
             $comment = isset($row[6]) && !empty($row[6]) ? $row[6] : null;
             $type = isset($row[8]) && !empty($row[8]) ? $row[8] : RedirectInterface::REDIRECT_TYPE_MANUAL;
+            $statusCode = intval($statusCode);
 
             $hosts = Arrays::trimExplode('|', $hosts);
             if ($hosts === []) {
