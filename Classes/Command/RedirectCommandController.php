@@ -217,11 +217,11 @@ class RedirectCommandController extends CommandController
      * @param RedirectInterface $redirect
      * @param string $sourceUriPath
      * @param string $targetUriPath
-     * @param string $host
+     * @param string|null $host
      * @param integer $statusCode
      * @return bool
      */
-    protected function isSame(string $sourceUriPath, string $targetUriPath, string $host, int $statusCode, RedirectInterface $redirect = null): bool
+    protected function isSame(string $sourceUriPath, string $targetUriPath, ?string $host, int $statusCode, RedirectInterface $redirect = null): bool
     {
         if ($redirect === null) {
             return false;
