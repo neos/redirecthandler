@@ -13,9 +13,6 @@ namespace Neos\RedirectHandler\Service;
  * source code.
  */
 
-use AppendIterator;
-use Generator;
-use SplTempFileObject;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
 use Neos\RedirectHandler\RedirectInterface;
@@ -47,7 +44,7 @@ class RedirectExportService
      */
     public function exportCsv(?string $host = null, bool $onlyActive = false, ?string $type = null, bool $includeHeader = true): Writer
     {
-        $writer = Writer::createFromFileObject(new SplTempFileObject());
+        $writer = Writer::createFromFileObject(new \SplTempFileObject());
         $redirects = $this->getRedirects($host, $onlyActive, $type);
 
         if ($includeHeader) {
@@ -88,7 +85,7 @@ class RedirectExportService
      * @param string $host
      * @param bool $onlyActive will filter inactive redirects based on start and end datetime if true
      * @param null|string $type will filter redirects based on their type
-     * @return Generator<RedirectInterface>|AppendIterator
+     * @return \Generator<RedirectInterface>|\AppendIterator
      */
     public function getRedirects(?string $host = null, bool $onlyActive = false, ?string $type = null)
     {

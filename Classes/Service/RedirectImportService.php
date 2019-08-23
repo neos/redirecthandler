@@ -13,8 +13,6 @@ namespace Neos\RedirectHandler\Service;
  * source code.
  */
 
-use DateTime;
-use Iterator;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -76,10 +74,10 @@ class RedirectImportService
     protected $validationOptions;
 
     /**
-     * @param Iterator $iterator
+     * @param \Iterator $iterator
      * @return array
      */
-    public function import(Iterator $iterator): array
+    public function import(\Iterator $iterator): array
     {
         $counter = 0;
         $protocol = [];
@@ -132,8 +130,8 @@ class RedirectImportService
             }
 
             if ($rawStartDateTime !== null) {
-                $startDateTime = DateTime::createFromFormat(self::REDIRECT_EXPORT_DATETIME_FORMAT, $rawStartDateTime);
-                if (!$startDateTime instanceof DateTime) {
+                $startDateTime = \DateTime::createFromFormat(self::REDIRECT_EXPORT_DATETIME_FORMAT, $rawStartDateTime);
+                if (!$startDateTime instanceof \DateTime) {
                     $protocol[] = [
                         'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
                         'arguments' => [],
@@ -146,8 +144,8 @@ class RedirectImportService
             }
 
             if ($rawEndDateTime !== null) {
-                $endDateTime = DateTime::createFromFormat(self::REDIRECT_EXPORT_DATETIME_FORMAT, $rawEndDateTime);
-                if (!$endDateTime instanceof DateTime) {
+                $endDateTime = \DateTime::createFromFormat(self::REDIRECT_EXPORT_DATETIME_FORMAT, $rawEndDateTime);
+                if (!$endDateTime instanceof \DateTime) {
                     $protocol[] = [
                         'type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR,
                         'arguments' => [],
@@ -242,8 +240,8 @@ class RedirectImportService
      * @param string $targetUriPath
      * @param string $host
      * @param integer $statusCode
-     * @param DateTime|null $startDateTime
-     * @param DateTime|null $endDateTime
+     * @param \DateTime|null $startDateTime
+     * @param \DateTime|null $endDateTime
      * @param string|null $comment
      * @param RedirectInterface $redirect
      * @return bool
@@ -253,8 +251,8 @@ class RedirectImportService
         string $targetUriPath,
         ?string $host,
         int $statusCode,
-        DateTime $startDateTime = null,
-        DateTime $endDateTime = null,
+        ?\DateTime $startDateTime = null,
+        ?\DateTime $endDateTime = null,
         ?string $comment = null,
         RedirectInterface $redirect = null
     ): bool {

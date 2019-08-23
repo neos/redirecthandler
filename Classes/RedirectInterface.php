@@ -13,13 +13,10 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use DateTimeInterface;
-use JsonSerializable;
-
 /**
  * Redirect Interface
  */
-interface RedirectInterface extends JsonSerializable
+interface RedirectInterface extends \JsonSerializable
 {
     const REDIRECT_TYPE_MANUAL = 'manual';
     const REDIRECT_TYPE_GENERATED = 'generated';
@@ -60,24 +57,24 @@ interface RedirectInterface extends JsonSerializable
     public function getType(): string;
 
     /**
-     * @return null|DateTimeInterface
+     * @return null| \DateTimeInterface
      */
-    public function getStartDateTime(): ?DateTimeInterface;
+    public function getStartDateTime(): ? \DateTimeInterface;
 
     /**
-     * @return null|DateTimeInterface
+     * @return null| \DateTimeInterface
      */
-    public function getEndDateTime(): ?DateTimeInterface;
+    public function getEndDateTime(): ? \DateTimeInterface;
 
     /**
-     * @return null|DateTimeInterface
+     * @return null| \DateTimeInterface
      */
-    public function getCreationDateTime(): ?DateTimeInterface;
+    public function getCreationDateTime(): ? \DateTimeInterface;
 
     /**
-     * @return null|DateTimeInterface
+     * @return null| \DateTimeInterface
      */
-    public function getLastModificationDateTime(): ?DateTimeInterface;
+    public function getLastModificationDateTime(): ? \DateTimeInterface;
 
     /**
      * @return integer
@@ -85,7 +82,7 @@ interface RedirectInterface extends JsonSerializable
     public function getHitCounter(): int;
 
     /**
-     * @return DateTimeInterface|null
+     * @return  \DateTimeInterface|null
      */
-    public function getLastHit(): ?DateTimeInterface;
+    public function getLastHit(): ? \DateTimeInterface;
 }

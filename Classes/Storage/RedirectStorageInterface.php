@@ -13,8 +13,6 @@ namespace Neos\RedirectHandler\Storage;
  * source code.
  */
 
-use DateTime;
-use Generator;
 use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 
@@ -40,20 +38,20 @@ interface RedirectStorageInterface
      * @param string $host Full qualified host name, a value of `null` will not filter the host and return all
      * @param bool $onlyActive Filters redirects which start and end datetime don't match the current datetime
      * @param string|null $type Filters redirects by their type
-     * @return Generator<RedirectDto>
+     * @return \Generator<RedirectDto>
      * @api
      */
-    public function getAll(string $host = null, bool $onlyActive = false, ?string $type = null): Generator;
+    public function getAll(string $host = null, bool $onlyActive = false, ?string $type = null): \Generator;
 
     /**
      * Returns all registered redirects without a host and matching the given parameters
      *
      * @param bool $onlyActive Filters redirects which start and end datetime don't match the current datetime
      * @param string|null $type Filters redirects by their type
-     * @return Generator<RedirectDto>
+     * @return \Generator<RedirectDto>
      * @api
      */
-    public function getAllWithoutHost(bool $onlyActive = false, ?string $type = null): Generator;
+    public function getAllWithoutHost(bool $onlyActive = false, ?string $type = null): \Generator;
 
     /**
      * Return a list of all hosts
@@ -100,8 +98,8 @@ interface RedirectStorageInterface
      * @param string|null $creator
      * @param string|null $comment
      * @param string|null $type
-     * @param DateTime|null $startDateTime
-     * @param DateTime|null $endDateTime
+     * @param \DateTime|null $startDateTime
+     * @param \DateTime|null $endDateTime
      * @return array<RedirectDto> the freshly generated redirects
      * @api
      */
@@ -113,8 +111,8 @@ interface RedirectStorageInterface
         ?string $creator = null,
         ?string $comment = null,
         ?string $type = null,
-        DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        \DateTime $startDateTime = null,
+        \DateTime $endDateTime = null
     ): array;
 
     /**

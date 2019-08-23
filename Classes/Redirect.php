@@ -13,9 +13,6 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use DateTime;
-use DateTimeInterface;
-
 /**
  * A Redirect DTO
  */
@@ -73,14 +70,14 @@ class Redirect implements RedirectInterface
     /**
      * The date and time the redirect should start being active
      *
-     * @var DateTime
+     * @var \DateTime
      */
     protected $startDateTime;
 
     /**
      * The date and time the redirect should stop being active
      *
-     * @var DateTime
+     * @var \DateTime
      */
     protected $endDateTime;
 
@@ -94,21 +91,21 @@ class Redirect implements RedirectInterface
     /**
      * The last date and time the redirect was executed
      *
-     * @var DateTime
+     * @var \DateTime
      */
     protected $lastHit;
 
     /**
      * The date and time the redirect was created
      *
-     * @var DateTime
+     * @var \DateTime
      */
     protected $creationDateTime;
 
     /**
      * The date and time the redirect was modified
      *
-     * @var DateTime
+     * @var \DateTime
      */
     protected $lastModificationDateTime;
 
@@ -120,12 +117,12 @@ class Redirect implements RedirectInterface
      * @param string|null $creator name of the person who created the redirect
      * @param string|null $comment textual description of the redirect
      * @param string|null $type
-     * @param DateTimeInterface|null $startDateTime
-     * @param DateTimeInterface|null $endDateTime
-     * @param DateTimeInterface|null $creationDateTime
-     * @param DateTimeInterface|null $lastModificationDateTime
+     * @param \DateTimeInterface|null $startDateTime
+     * @param \DateTimeInterface|null $endDateTime
+     * @param \DateTimeInterface|null $creationDateTime
+     * @param \DateTimeInterface|null $lastModificationDateTime
      * @param int $hitCounter
-     * @param DateTimeInterface|null $lastHit
+     * @param \DateTimeInterface|null $lastHit
      */
     public function __construct(
         string $sourceUriPath,
@@ -135,12 +132,12 @@ class Redirect implements RedirectInterface
         ?string $creator = null,
         ?string $comment = null,
         ?string $type = null,
-        DateTimeInterface $startDateTime = null,
-        DateTimeInterface $endDateTime = null,
-        DateTimeInterface $creationDateTime = null,
-        DateTimeInterface $lastModificationDateTime = null,
+        \DateTimeInterface $startDateTime = null,
+        \DateTimeInterface $endDateTime = null,
+        \DateTimeInterface $creationDateTime = null,
+        \DateTimeInterface $lastModificationDateTime = null,
         int $hitCounter = 0,
-        DateTimeInterface $lastHit = null
+        \DateTimeInterface $lastHit = null
     ) {
         $this->sourceUriPath = ltrim($sourceUriPath, '/');
         $this->targetUriPath = ltrim($targetUriPath, '/');
@@ -228,33 +225,33 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTime
+     * @return \DateTimeInterface
      */
-    public function getStartDateTime(): ?DateTimeInterface
+    public function getStartDateTime(): ?\DateTimeInterface
     {
         return $this->startDateTime;
     }
 
     /**
-     * @return DateTime
+     * @return \DateTimeInterface
      */
-    public function getEndDateTime(): ?DateTimeInterface
+    public function getEndDateTime(): ?\DateTimeInterface
     {
         return $this->endDateTime;
     }
 
     /**
-     * @return null|DateTimeInterface
+     * @return null|\DateTimeInterface
      */
-    public function getCreationDateTime(): ?DateTimeInterface
+    public function getCreationDateTime(): ?\DateTimeInterface
     {
         return $this->creationDateTime;
     }
 
     /**
-     * @return null|DateTimeInterface
+     * @return null|\DateTimeInterface
      */
-    public function getLastModificationDateTime(): ?DateTimeInterface
+    public function getLastModificationDateTime(): ?\DateTimeInterface
     {
         return $this->lastModificationDateTime;
     }
@@ -268,9 +265,9 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return null|DateTimeInterface
+     * @return null|\DateTimeInterface
      */
-    public function getLastHit(): ?DateTimeInterface
+    public function getLastHit(): ?\DateTimeInterface
     {
         return $this->lastHit;
     }
@@ -291,18 +288,18 @@ class Redirect implements RedirectInterface
             'creator' => $this->getCreator(),
             'type' => $this->getType(),
             'hitCounter' => $this->getHitCounter(),
-            'lastHit' => $this->getLastHit() ? $this->getLastHit()->format(DATETIME::W3C) : '',
+            'lastHit' => $this->getLastHit() ? $this->getLastHit()->format(\DATETIME::W3C) : '',
             'creationDateTime' => $this->getCreationDateTime() ? $this->formatDateTimeForSerialization($this->getCreationDateTime()) : '',
             'lastModificationDateTime' => $this->getLastModificationDateTime() ? $this->formatDateTimeForSerialization($this->getLastModificationDateTime()) : '',
         ];
     }
 
     /**
-     * @param DateTimeInterface $dateTime
+     * @param \DateTimeInterface $dateTime
      * @return string|null
      */
-    protected function formatDateTimeForSerialization(DateTimeInterface $dateTime): ?string
+    protected function formatDateTimeForSerialization(\DateTimeInterface $dateTime): ?string
     {
-        return $dateTime ? $dateTime->format(DATETIME::W3C) : null;
+        return $dateTime ? $dateTime->format(\DATETIME::W3C) : null;
     }
 }
