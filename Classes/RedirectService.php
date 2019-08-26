@@ -110,9 +110,9 @@ class RedirectService
                 $location = $httpRequest->getAttribute(ServerRequestAttributes::BASE_URI) . $location;
             }
 
-            $response = $response->withHeader('Location',$location)
-                ->withHeader( 'Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
-                ->withHeader(  'Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
+            $response = $response->withHeader('Location', $location)
+                ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
+                ->withHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
 
         } elseif ($statusCode >= 400 && $statusCode <= 599) {
             $exception = new Exception();
