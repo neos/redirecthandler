@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler;
 
 /*
@@ -11,12 +13,13 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
+use Neos\Flow\Http\ServerRequestAttributes;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Http\Headers;
-use Neos\Flow\Http\Request as Request;
-use Neos\Flow\Http\Response;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Central authority for HTTP redirects.
@@ -41,6 +44,12 @@ class RedirectService
     protected $routerCachingService;
 
     /**
+     * @Flow\Inject
+     * @var ResponseFactoryInterface
+     */
+    protected $responseFactory;
+
+    /**
      * @Flow\InjectConfiguration(path="features")
      * @var array
      */
@@ -49,15 +58,15 @@ class RedirectService
     /**
      * Searches for a matching redirect for the given HTTP response
      *
-     * @param Request $httpRequest
-     * @return Response|null
+     * @param ServerRequestInterface $httpRequest
+     * @return ResponseInterface|null
      * @throws Exception
      * @api
      */
-    public function buildResponseIfApplicable(Request $httpRequest): ?Response
+    public function buildResponseIfApplicable(ServerRequestInterface $httpRequest): ?ResponseInterface
     {
         try {
-            $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($httpRequest->getRelativePath(), $httpRequest->getBaseUri()->getHost());
+            $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($httpRequest->getUri()->getPath(), $httpRequest->getUri()->getHost());
             if ($redirect === null) {
                 return null;
             }
@@ -80,33 +89,30 @@ class RedirectService
     }
 
     /**
-     * @param Request $httpRequest
+     * @param ServerRequestInterface $httpRequest
      * @param RedirectInterface $redirect
-     * @return Response|null
+     * @return ResponseInterface|null
      * @throws Exception
      */
-    protected function buildResponse(Request $httpRequest, RedirectInterface $redirect): ?Response
+    protected function buildResponse(ServerRequestInterface $httpRequest, RedirectInterface $redirect): ?ResponseInterface
     {
         if (headers_sent() === true && FLOW_SAPITYPE !== 'CLI') {
             return null;
         }
 
-        $response = new Response();
         $statusCode = $redirect->getStatusCode();
-        $response->setStatus($statusCode);
+        $response = $this->responseFactory->createResponse($statusCode);
 
         if ($statusCode >= 300 && $statusCode <= 399) {
             $location = $redirect->getTargetUriPath();
 
             if (parse_url($location, PHP_URL_SCHEME) === null) {
-                $location = $httpRequest->getBaseUri() . $location;
+                $location = (string)$httpRequest->getUri()->withQuery('')->withFragment('')->withPath($location);
             }
 
-            $response->setHeaders(new Headers([
-                'Location' => $location,
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
-                'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT'
-            ]));
+            $response = $response->withHeader('Location', $location)
+                ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
+                ->withHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
         } elseif ($statusCode >= 400 && $statusCode <= 599) {
             $exception = new Exception();
             $exception->setStatusCode($statusCode);

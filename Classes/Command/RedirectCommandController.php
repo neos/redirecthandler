@@ -16,6 +16,7 @@ namespace Neos\RedirectHandler\Command;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Exception as CsvException;
 use League\Csv\Reader;
+use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Service\RedirectExportService;
@@ -146,7 +147,7 @@ class RedirectCommandController extends CommandController
                 file_put_contents($filename, (string)$csvWriter);
             }
         } catch (CannotInsertRecord $e) {
-            $this->logger->error(vsprintf('Redirect export error, host=%s', [$host]));
+            $this->logger->error(vsprintf('Redirect export error, host=%s', [$host]), LogEnvironment::fromMethodName(__METHOD__));
         }
     }
 

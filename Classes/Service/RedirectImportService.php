@@ -15,6 +15,7 @@ namespace Neos\RedirectHandler\Service;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\ThrowableStorageInterface;
+use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Security\Context as SecurityContext;
 use Neos\RedirectHandler\Exception;
@@ -207,8 +208,7 @@ class RedirectImportService
                         $redirect->getStatusCode(),
                         $redirect->getHost() ?: 'all hosts'
                     ];
-                    $this->logger->error(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s',
-                        $messageArguments));
+                    $this->logger->error(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LogEnvironment::fromMethodName(__METHOD__));
                 }
                 $this->persistenceManager->persistAll();
             } catch (Exception $exception) {
@@ -223,8 +223,7 @@ class RedirectImportService
                     'arguments' => $messageArguments,
                     'message' => $exception->getMessage()
                 ];
-                $this->logger->error(vsprintf('Redirect import error, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s',
-                    $messageArguments));
+                $this->logger->error(vsprintf('Redirect import error, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LogEnvironment::fromMethodName(__METHOD__));
                 $this->throwableStorage->logThrowable($exception);
             }
             $counter++;

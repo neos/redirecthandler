@@ -14,6 +14,7 @@ namespace Neos\RedirectHandler\Traits;
  */
 
 use Neos\Flow\Log\ThrowableStorageInterface;
+use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
@@ -55,7 +56,7 @@ trait RedirectSignalTrait
                 throw new Exception('Redirect should implement RedirectInterface', 1460139669);
             }
             $this->_redirectService->emitRedirectCreated($redirect);
-            $this->_logger->debug(sprintf('Redirect from %s %s -> %s (%d) added', $redirect->getHost(), $redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode()));
+            $this->_logger->debug(sprintf('Redirect from %s %s -> %s (%d) added', $redirect->getHost(), $redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode()), LogEnvironment::fromMethodName(__METHOD__));
         }
     }
 }
