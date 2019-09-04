@@ -107,7 +107,7 @@ class RedirectService
             $location = $redirect->getTargetUriPath();
 
             if (parse_url($location, PHP_URL_SCHEME) === null) {
-                $location = $httpRequest->getAttribute(ServerRequestAttributes::BASE_URI) . $location;
+                $location = (string)$httpRequest->getUri()->withQuery('')->withFragment('')->withPath($location);
             }
 
             $response = $response->withHeader('Location', $location)
