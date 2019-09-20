@@ -12,12 +12,10 @@ namespace Neos\RedirectHandler\Tests\Unit;
  */
 
 use Doctrine\DBAL\DBALException;
+use Neos\Flow\Mvc\RequestInterface;
 use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
-use Neos\Flow\Http\Request;
-use Neos\Flow\Http\Response;
-use Neos\Flow\Http\Uri;
 use Neos\Flow\Tests\UnitTestCase;
 
 /**
@@ -36,14 +34,14 @@ class RedirectServiceTest extends UnitTestCase
     protected $mockRedirectStorage;
 
     /**
-     * @var Request
+     * @var RequestInterface
      */
     protected $mockHttpRequest;
 
     /**
      * Sets up this test case
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->redirectService = new RedirectService();
 
@@ -73,7 +71,7 @@ class RedirectServiceTest extends UnitTestCase
     public function buildResponseIfApplicableReturnsSilentlyIfRedirectRepositoryThrowsException()
     {
         $this->mockRedirectStorage
-            ->expects($this->atLeastOnce())
+            ->expects(static::atLeastOnce())
             ->method('getOneBySourceUriPathAndHost')
             ->will($this->throwException(new DBALException()));
 
@@ -86,17 +84,17 @@ class RedirectServiceTest extends UnitTestCase
     public function buildResponseIfApplicableReturnsNullIfNoApplicableRedirectIsFound()
     {
         $this->mockHttpRequest
-            ->expects($this->atLeastOnce())
+            ->expects(static::atLeastOnce())
             ->method('getRelativePath')
-            ->will($this->returnValue('some/relative/path'));
+            ->will(static::returnValue('some/relative/path'));
 
         $this->mockRedirectStorage
             ->expects($this->once())
             ->method('getOneBySourceUriPathAndHost')
             ->with('some/relative/path')
-            ->will($this->returnValue(null));
+            ->will(static::returnValue(null));
 
-        $this->assertNull($this->redirectService->buildResponseIfApplicable($this->mockHttpRequest));
+        static::assertNull($this->redirectService->buildResponseIfApplicable($this->mockHttpRequest));
     }
 
     /**
@@ -105,7 +103,7 @@ class RedirectServiceTest extends UnitTestCase
     public function buildResponseIfApplicableRetunsHttpRequestIfApplicableRedirectIsFound()
     {
         $this->mockHttpRequest
-            ->expects($this->atLeastOnce())
+            ->expects(static::atLeastOnce())
             ->method('getRelativePath')
             ->willReturn('some/relative/path');
 
@@ -113,12 +111,12 @@ class RedirectServiceTest extends UnitTestCase
             ->disableOriginalConstructor()
             ->getMock();
         $mockRedirect
-            ->expects($this->atLeastOnce())
+            ->expects(static::atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(301);
 
         $this->mockRedirectStorage
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getOneBySourceUriPathAndHost')
             ->with('some/relative/path')
             ->willReturn($mockRedirect);
@@ -127,6 +125,6 @@ class RedirectServiceTest extends UnitTestCase
 
         $request = $this->redirectService->buildResponseIfApplicable($this->mockHttpRequest);
 
-        $this->assertInstanceOf(Response::class, $request);
+        static::assertInstanceOf(Response::class, $request);
     }
 }
