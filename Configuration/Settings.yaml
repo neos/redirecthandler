@@ -1,4 +1,3 @@
-
 Neos:
   RedirectHandler:
     features:
@@ -7,7 +6,7 @@ Neos:
       redirect: 301
       gone: 410
     validation:
-      sourceUriPath: '/^[a-z0-9\-\/\.]+$/i'
+      sourceUriPath: '/^[a-z0-9_\-\/\.]+$/i'
   Flow:
     http:
       chain:
