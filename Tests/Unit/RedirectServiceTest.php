@@ -72,6 +72,11 @@ class RedirectServiceTest extends UnitTestCase
      */
     public function buildResponseIfApplicableReturnsSilentlyIfRedirectRepositoryThrowsException()
     {
+        $this->mockHttpRequest
+            ->expects($this->atLeastOnce())
+            ->method('getRelativePath')
+            ->will($this->returnValue('some/relative/path'));
+
         $this->mockRedirectStorage
             ->expects($this->atLeastOnce())
             ->method('getOneBySourceUriPathAndHost')
