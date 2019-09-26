@@ -106,24 +106,21 @@ class RedirectImportService
                 continue;
             }
 
-            [
-                $sourceUriPath,
-                $targetUriPath,
-                $statusCode,
-            ] = $row;
+            // Retrieve field by field if csv doesn't have all columns
+            $sourceUriPath = ltrim(trim($row[0], '/'));
 
             // Skip first line with headers
             if ($counter === 0 && $sourceUriPath === 'Source Uri') {
                 continue;
             }
 
-            // Retrieve field by field if csv doesn't have all columns
+            $targetUriPath = ltrim(trim($row[1], '/'));
+            $statusCode = intval($row[2]);
             $hosts = isset($row[3]) && !empty($row[3]) ? $row[3] : '';
             $rawStartDateTime = isset($row[4]) && !empty($row[4]) ? $row[4] : null;
             $rawEndDateTime = isset($row[5]) && !empty($row[5]) ? $row[5] : null;
             $comment = isset($row[6]) && !empty($row[6]) ? $row[6] : null;
             $type = isset($row[8]) && !empty($row[8]) ? $row[8] : RedirectInterface::REDIRECT_TYPE_MANUAL;
-            $statusCode = intval($statusCode);
 
             $hosts = Arrays::trimExplode('|', $hosts);
             if ($hosts === []) {
