@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\Traits;
 
 /*
@@ -11,9 +13,13 @@ namespace Neos\RedirectHandler\Traits;
  * source code.
  */
 
+use Neos\Flow\Log\ThrowableStorageInterface;
+use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\RedirectHandler\Exception;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
+use Neos\RedirectHandler\RedirectService;
+use Psr\Log\LoggerInterface;
 
 /**
  * RedirectSignal
@@ -22,29 +28,35 @@ trait RedirectSignalTrait
 {
     /**
      * @Flow\Inject
-     * @var \Neos\RedirectHandler\RedirectService
+     * @var RedirectService
      */
     protected $_redirectService;
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Log\SystemLoggerInterface
+     * @var LoggerInterface
      */
     protected $_logger;
+
+    /**
+     * @Flow\Inject
+     * @var ThrowableStorageInterface
+     */
+    protected $_throwableStorage;
 
     /**
      * @param array $redirects
      * @return void
      * @throws Exception
      */
-    public function emitRedirectCreated(array $redirects)
+    public function emitRedirectCreated(array $redirects): void
     {
         foreach ($redirects as $redirect) {
             if (!$redirect instanceof RedirectInterface) {
                 throw new Exception('Redirect should implement RedirectInterface', 1460139669);
             }
             $this->_redirectService->emitRedirectCreated($redirect);
-            $this->_logger->log(sprintf('Redirect from %s %s -> %s (%d) added', $redirect->getHost(), $redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode()), LOG_DEBUG);
+            $this->_logger->debug(sprintf('Redirect from %s %s -> %s (%d) added', $redirect->getHost(), $redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode()), LogEnvironment::fromMethodName(__METHOD__));
         }
     }
 }

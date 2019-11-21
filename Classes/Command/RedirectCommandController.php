@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\Command;
 
 /*
@@ -11,17 +13,19 @@ namespace Neos\RedirectHandler\Command;
  * source code.
  */
 
+use League\Csv\CannotInsertRecord;
+use League\Csv\Exception as CsvException;
 use League\Csv\Reader;
-use League\Csv\Writer;
-use Neos\RedirectHandler\Exception;
-use Neos\RedirectHandler\Redirect;
+use Neos\Flow\Log\Utility\LogEnvironment;
+use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\RedirectHandler\RedirectInterface;
+use Neos\RedirectHandler\Service\RedirectExportService;
+use Neos\RedirectHandler\Service\RedirectImportService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
-use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Neos\Utility\Arrays;
+use Psr\Log\LoggerInterface;
 
 /**
  * Command controller for tasks related to redirects
@@ -44,9 +48,21 @@ class RedirectCommandController extends CommandController
 
     /**
      * @Flow\Inject
-     * @var SystemLoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @Flow\Inject
+     * @var RedirectExportService
+     */
+    protected $redirectExportService;
+
+    /**
+     * @Flow\Inject
+     * @var RedirectImportService
+     */
+    protected $redirectImportService;
 
     /**
      * List all redirects
@@ -58,10 +74,10 @@ class RedirectCommandController extends CommandController
      * @param string $match (optional) A string to match for the ``source`` or the ``target``
      * @return void
      */
-    public function listCommand($host = null, $match = null)
+    public function listCommand($host = null, $match = null): void
     {
         $outputByHost = function ($host = null) use ($match) {
-            $redirects = $this->redirectStorage->getAll($host);
+            $redirects = $host === null ? $this->redirectStorage->getAllWithoutHost() : $this->redirectStorage->getAll($host);
             $this->outputLine();
             if ($host !== null) {
                 $this->outputLine('<info>==</info> <b>Redirect for %s</b>', [$host]);
@@ -113,40 +129,25 @@ class RedirectCommandController extends CommandController
      *
      * This command will export all redirects in CSV format. You can set a preferred
      * filename before the export with the optional ``filename`` argument. If no ``filename`` argument is supplied, the
-     * export will be returned within the CLI. This operation requires the package ``league/csv``. Install it by running
-     * ``composer require league/csv``.
+     * export will be returned within the CLI.
      *
      * @param string $filename (optional) The filename for the CSV file
-     * @param string $host (optional) Only export hosts for a specified host
+     * @param string|null $host (optional) Only export redirects for a specified host
+     * @param bool $includeHeader Add line with column names as first line
      * @return void
      */
-    public function exportCommand($filename = null, $host = null)
+    public function exportCommand(string $filename = null, ?string $host = null, bool $includeHeader = true): void
     {
-        if (!class_exists(Writer::class)) {
-            $this->outputWarningForLeagueCsvPackage();
-        }
-        $writer = Writer::createFromFileObject(new \SplTempFileObject());
-        if ($host !== null) {
-            $redirects = $this->redirectStorage->getAll($host);
-        } else {
-            $redirects = new \AppendIterator();
-            foreach ($this->redirectStorage->getDistinctHosts() as $host) {
-                $redirects->append($this->redirectStorage->getAll($host));
+        try {
+            $csvWriter = $this->redirectExportService->exportCsv($host, false, null, $includeHeader);
+
+            if ($filename === null) {
+                $csvWriter->output();
+            } else {
+                file_put_contents($filename, (string)$csvWriter);
             }
-        }
-        /** @var $redirect RedirectInterface */
-        foreach ($redirects as $redirect) {
-            $writer->insertOne([
-                $redirect->getSourceUriPath(),
-                $redirect->getTargetUriPath(),
-                $redirect->getStatusCode(),
-                $redirect->getHost()
-            ]);
-        }
-        if ($filename === null) {
-            $writer->output();
-        } else {
-            file_put_contents($filename, (string)$writer);
+        } catch (CannotInsertRecord $e) {
+            $this->logger->error(vsprintf('Redirect export error, host=%s', [$host]), LogEnvironment::fromMethodName(__METHOD__));
         }
     }
 
@@ -164,15 +165,14 @@ class RedirectCommandController extends CommandController
      * the import. Be aware that this will also delete all automatically generated redirects.
      *
      * @param string $filename CSV file path
+     * @param string $delimiter
      * @return void
+     * @throws CsvException
      */
-    public function importCommand($filename)
+    public function importCommand(string $filename, string $delimiter = ','): void
     {
         $hasErrors = false;
         $this->outputLine();
-        if (!class_exists(Reader::class)) {
-            $this->outputWarningForLeagueCsvPackage();
-        }
         if (!is_readable($filename)) {
             $this->outputLine('<error>Sorry, but the file "%s" is not readable or does not exist...</error>', [$filename]);
             $this->outputLine();
@@ -181,57 +181,30 @@ class RedirectCommandController extends CommandController
         $this->outputLine('<b>Import redirects from "%s"</b>', [$filename]);
         $this->outputLine();
         $reader = Reader::createFromPath($filename);
-        $counter = 0;
-        foreach ($reader as $index => $row) {
-            $skipped = false;
-            list($sourceUriPath, $targetUriPath, $statusCode, $hosts) = $row;
-            $hosts = Arrays::trimExplode('|', $hosts);
-            if ($hosts === []) {
-                $hosts = [null];
-            }
-            $forcePersist = false;
-            foreach ($hosts as $key => $host) {
-                $host = trim($host);
-                $host = $host === '' ? null : $host;
-                $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourceUriPath, $host);
-                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $redirect);
-                if ($redirect !== null && $isSame === false) {
-                    $this->outputRedirectLine('<info>--</info>', $redirect);
-                    $this->redirectStorage->removeOneBySourceUriPathAndHost($sourceUriPath, $host);
-                    $forcePersist = true;
-                } elseif ($isSame === true) {
-                    $this->outputRedirectLine('<comment>~~</comment>', $redirect);
-                    unset($hosts[$key]);
-                    $skipped = true;
-                }
-            }
-            if ($skipped === true && $hosts === []) {
-                continue;
-            }
-            if ($forcePersist) {
-                $this->persistenceManager->persistAll();
-            }
-            try {
-                $redirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode, $hosts);
-                /** @var Redirect $redirect */
-                foreach ($redirects as $redirect) {
-                    $this->outputRedirectLine('<info>++</info>', $redirect);
-                    $messageArguments = [$redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode(), $redirect->getHost() ?: 'all host'];
-                    $this->logger->log(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LOG_ERR);
-                }
-                $this->persistenceManager->persistAll();
-            } catch (Exception $exception) {
-                $messageArguments = [$sourceUriPath, $targetUriPath, $statusCode, $hosts ? json_encode($hosts) : 'all host'];
-                $this->outputLine('   <error>!!</error> %s => %s <comment>(%d)</comment> - %s', $messageArguments);
-                $this->outputLine('      Message: %s', [$exception->getMessage()]);
-                $this->logger->log(vsprintf('Redirect import error, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LOG_ERR);
-                $this->logger->logException($exception);
-                $hasErrors = true;
-            }
-            $counter++;
-            if ($counter % 50 === 0) {
-                $this->persistenceManager->persistAll();
-                $this->persistenceManager->clearState();
+        $reader->setDelimiter($delimiter);
+        $protocol = $this->redirectImportService->import($reader->getIterator());
+        foreach ($protocol as $entry) {
+            switch ($entry['type']) {
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_CREATED:
+                    $this->outputRedirectLine('<info>++</info>', $entry['redirect']);
+                    break;
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_DELETED:
+                    $this->outputRedirectLine('<info>--</info>', $entry['redirect']);
+                    break;
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_UNCHANGED:
+                    $this->outputRedirectLine('<comment>~~</comment>', $entry['redirect']);
+                    break;
+                case RedirectImportService::REDIRECT_IMPORT_MESSAGE_TYPE_ERROR:
+                    $hasErrors = true;
+                    if ($entry['arguments']) {
+                        $this->outputLine('   <error>!!</error> %s => %s <comment>(%d)</comment> - %s', $entry['arguments']);
+                        $this->outputLine('      Message: %s', [$entry['message']]);
+                    } else {
+                        $this->outputLine('   <error>!!</error> ' . $entry['message']);
+                    }
+                    break;
+                default:
+                    $this->outputLine('<info>!!</info> Undefined protocol entry with type ' . $entry['type']);
             }
         }
         $this->outputLine();
@@ -245,30 +218,16 @@ class RedirectCommandController extends CommandController
      * @param RedirectInterface $redirect
      * @param string $sourceUriPath
      * @param string $targetUriPath
-     * @param string $host
+     * @param string|null $host
      * @param integer $statusCode
-     * @return boolean
+     * @return bool
      */
-    protected function isSame($sourceUriPath, $targetUriPath, $host, $statusCode, RedirectInterface $redirect = null)
+    protected function isSame(string $sourceUriPath, string $targetUriPath, ?string $host, int $statusCode, RedirectInterface $redirect = null): bool
     {
         if ($redirect === null) {
             return false;
         }
         return $redirect->getSourceUriPath() === $sourceUriPath && $redirect->getTargetUriPath() === $targetUriPath && $redirect->getHost() === $host && $redirect->getStatusCode() === (integer)$statusCode;
-    }
-
-    /**
-     * @return void
-     */
-    protected function outputWarningForLeagueCsvPackage()
-    {
-        $this->outputLine();
-        $this->outputLine('<info>Import/Export</info> features require the package <b>league/csv</b>');
-        $this->outputLine();
-        $this->outputLine('Open your shell and launch:');
-        $this->outputLine('# <comment>composer require league/csv</comment>');
-        $this->outputLine();
-        $this->sendAndExit(1);
     }
 
     /**
@@ -280,8 +239,9 @@ class RedirectCommandController extends CommandController
      * @param string $source The source URI path of the redirect to remove, as given by ``redirect:list``
      * @param string $host (optional) Only remove redirects that use this host
      * @return void
+     * @throws StopActionException
      */
-    public function removeCommand($source, $host = null)
+    public function removeCommand(string $source, ?string $host = null): void
     {
         $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($source, $host);
         if ($redirect === null) {
@@ -299,7 +259,7 @@ class RedirectCommandController extends CommandController
      *
      * @return void
      */
-    public function removeAllCommand()
+    public function removeAllCommand(): void
     {
         $this->redirectStorage->removeAll();
         $this->outputLine('Removed all redirects');
@@ -314,7 +274,7 @@ class RedirectCommandController extends CommandController
      * @param string $host Fully qualified host name or `all` to delete redirects valid for all hosts
      * @return void
      */
-    public function removeByHostCommand($host)
+    public function removeByHostCommand(string $host): void
     {
         if ($host === 'all') {
             $this->redirectStorage->removeByHost(null);
@@ -340,7 +300,7 @@ class RedirectCommandController extends CommandController
      * @param boolean $force Replace existing redirect (based on the source URI)
      * @return void
      */
-    public function addCommand($source, $target, $statusCode, $host = null, $force = false)
+    public function addCommand(string $source, string $target, int $statusCode, ?string $host = null, bool $force = false): void
     {
         $this->outputLine();
         $this->outputLine('<b>Create a redirect ...</b>');
@@ -377,7 +337,7 @@ class RedirectCommandController extends CommandController
      * @param RedirectInterface $redirect
      * @return void
      */
-    protected function outputRedirectLine($prefix, RedirectInterface $redirect)
+    protected function outputRedirectLine(string $prefix, RedirectInterface $redirect): void
     {
         $this->outputLine('   %s %s <info>=></info> %s <comment>(%d)</comment> - %s', [
             $prefix,
@@ -391,7 +351,7 @@ class RedirectCommandController extends CommandController
     /**
      * @return void
      */
-    protected function outputLegend()
+    protected function outputLegend(): void
     {
         $this->outputLine('<b>Legend</b>');
         $this->outputLine();

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler;
 
 /*
@@ -11,31 +13,76 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use Doctrine\ORM\Mapping as ORM;
-use Neos\Flow\Annotations as Flow;
-
 /**
  * Redirect Interface
  */
-interface RedirectInterface
+interface RedirectInterface extends \JsonSerializable
 {
-    /**
-     * @return string
-     */
-    public function getSourceUriPath();
+    const REDIRECT_TYPE_MANUAL = 'manual';
+    const REDIRECT_TYPE_GENERATED = 'generated';
 
     /**
      * @return string
      */
-    public function getTargetUriPath();
+    public function getSourceUriPath(): string;
+
+    /**
+     * @return string
+     */
+    public function getTargetUriPath(): string;
+
+    /**
+     * @return int
+     */
+    public function getStatusCode(): int;
+
+    /**
+     * @return null|string
+     */
+    public function getHost(): ?string;
+
+    /**
+     * @return null|string
+     */
+    public function getCreator(): ?string;
+
+    /**
+     * @return null|string
+     */
+    public function getComment(): ?string;
+
+    /**
+     * @return string
+     */
+    public function getType(): string;
+
+    /**
+     * @return null| \DateTimeInterface
+     */
+    public function getStartDateTime(): ? \DateTimeInterface;
+
+    /**
+     * @return null| \DateTimeInterface
+     */
+    public function getEndDateTime(): ? \DateTimeInterface;
+
+    /**
+     * @return null| \DateTimeInterface
+     */
+    public function getCreationDateTime(): ? \DateTimeInterface;
+
+    /**
+     * @return null| \DateTimeInterface
+     */
+    public function getLastModificationDateTime(): ? \DateTimeInterface;
 
     /**
      * @return integer
      */
-    public function getStatusCode();
+    public function getHitCounter(): int;
 
     /**
-     * @return string
+     * @return  \DateTimeInterface|null
      */
-    public function getHost();
+    public function getLastHit(): ? \DateTimeInterface;
 }
