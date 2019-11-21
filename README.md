@@ -31,3 +31,9 @@ webserver directly:
 For the redirect handler to even see the request, this has to be removed. Usually the performance impact
 can be neglected, since Flow is only hit for resources that once existed and to which someone still holds
 a link.
+
+## Possible problems
+
+- When trying to redirect URLs with umlauts (or other special chars), be aware you might need to
+  enter them urlencoded. But to be able to enter `%C3%BC` in place of `ü` you will need to adjust the
+  source path validation regex to allow `%`.
