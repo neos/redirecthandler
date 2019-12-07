@@ -73,3 +73,8 @@ Be careful when using this configuration, as this will make the redirect
 component act first before any other route is resolved and could for 
 example prevent a login or similar.
                    
+## Possible problems
+
+- When trying to redirect URLs with umlauts (or other special chars), be aware you might need to
+  enter them urlencoded. But to be able to enter `%C3%BC` in place of `ü` you will need to adjust the
+  source path validation regex to allow `%`.
