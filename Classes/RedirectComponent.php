@@ -60,8 +60,8 @@ class RedirectComponent implements ComponentInterface
     public function handle(ComponentContext $componentContext)
     {
         $routingMatchResults = $componentContext->getParameter(RoutingComponent::class, 'matchResults');
-        if ($routingMatchResults !== NULL) {
-            if(isset($routingMatchResults['node'])){
+        if ($routingMatchResults !== null) {
+            if (isset($routingMatchResults['node'])) {
                 $nodePathIncludingContextAndDimensions = $routingMatchResults['node'];
                 $node = null;
                 $this->securityContext->withoutAuthorizationChecks(function () use ($nodePathIncludingContextAndDimensions, &$node) {
@@ -69,12 +69,11 @@ class RedirectComponent implements ComponentInterface
                 });
 
                 // if the node is found there is no need to redirect, thus return
-                if($node instanceof NodeInterface){
+                if ($node instanceof NodeInterface) {
                     return;
                 }
                 // in case the node is hidden, convertFrom() will return an Error() and thus redirect if applicable
-            }
-            else{
+            } else {
                 return;
             }
         }
