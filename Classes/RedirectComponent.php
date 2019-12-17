@@ -18,6 +18,9 @@ use Neos\Flow\Http\Component\ComponentContext;
 use Neos\Flow\Http\Component\ComponentInterface;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Neos\Flow\Mvc\Routing\RoutingComponent;
+use Neos\Flow\Security\Context as SecurityContext;
+use Neos\ContentRepository\Domain\Model\NodeInterface;
+use Neos\ContentRepository\TypeConverter\NodeConverter;
 
 /**
  * Redirect HTTP Component
@@ -37,6 +40,18 @@ class RedirectComponent implements ComponentInterface
     protected $redirectService;
 
     /**
+     * @Flow\Inject
+     * @var SecurityContext
+     */
+    protected $securityContext;
+
+    /**
+     * @var NodeConverter
+     * @Flow\Inject
+     */
+    protected $nodeConverter;
+
+    /**
      * Check if the current request match a redirect
      *
      * @param ComponentContext $componentContext
@@ -46,8 +61,24 @@ class RedirectComponent implements ComponentInterface
     {
         $routingMatchResults = $componentContext->getParameter(RoutingComponent::class, 'matchResults');
         if ($routingMatchResults !== NULL) {
-            return;
+            if(isset($routingMatchResults['node'])){
+                $nodePathIncludingContextAndDimensions = $routingMatchResults['node'];
+                $node = null;
+                $this->securityContext->withoutAuthorizationChecks(function () use ($nodePathIncludingContextAndDimensions, &$node) {
+                    $node = $this->nodeConverter->convertFrom($nodePathIncludingContextAndDimensions, NodeInterface::class);
+                });
+
+                // if the node is found there is no need to redirect, thus return
+                if($node instanceof NodeInterface){
+                    return;
+                }
+                // in case the node is hidden, convertFrom() will return an Error() and thus redirect if applicable
+            }
+            else{
+                return;
+            }
         }
+
         $httpRequest = $componentContext->getHttpRequest();
         $response = $this->redirectService->buildResponseIfApplicable($httpRequest);
         if ($response !== null) {
