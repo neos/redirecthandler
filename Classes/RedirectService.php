@@ -13,9 +13,9 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use Neos\Flow\Http\ServerRequestAttributes;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Helper\RequestInformationHelper;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -107,7 +107,8 @@ class RedirectService
             $location = $redirect->getTargetUriPath();
 
             if (parse_url($location, PHP_URL_SCHEME) === null) {
-                $location = (string)$httpRequest->getUri()->withQuery('')->withFragment('')->withPath($location);
+                $baseUriForRequest = (string)RequestInformationHelper::generateBaseUri($httpRequest);
+                $location = rtrim($baseUriForRequest, '/') . '/' . ltrim($location, '/');
             }
 
             $response = $response->withHeader('Location', $location)
