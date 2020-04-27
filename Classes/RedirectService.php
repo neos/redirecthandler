@@ -16,7 +16,6 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Headers;
 use Neos\Flow\Http\Request as Request;
 use Neos\Flow\Http\Response;
-use Neos\Flow\Mvc\Routing\RouterCachingService;
 
 /**
  * Central authority for HTTP redirects.
@@ -33,12 +32,6 @@ class RedirectService
      * @var RedirectStorageInterface
      */
     protected $redirectStorage;
-
-    /**
-     * @Flow\Inject
-     * @var RouterCachingService
-     */
-    protected $routerCachingService;
 
     /**
      * @Flow\InjectConfiguration(path="features")
