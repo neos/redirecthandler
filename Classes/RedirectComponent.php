@@ -17,7 +17,6 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Component\ComponentChain;
 use Neos\Flow\Http\Component\ComponentContext;
 use Neos\Flow\Http\Component\ComponentInterface;
-use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Neos\Flow\Mvc\Routing\RoutingComponent;
 
 /**
@@ -25,11 +24,6 @@ use Neos\Flow\Mvc\Routing\RoutingComponent;
  */
 class RedirectComponent implements ComponentInterface
 {
-    /**
-     * @var RouterCachingService
-     * @Flow\Inject
-     */
-    protected $routerCachingService;
 
     /**
      * @var RedirectService

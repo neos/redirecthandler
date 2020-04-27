@@ -13,10 +13,8 @@ namespace Neos\RedirectHandler;
  * source code.
  */
 
-use Neos\Flow\Http\ServerRequestAttributes;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,12 +34,6 @@ class RedirectService
      * @var RedirectStorageInterface
      */
     protected $redirectStorage;
-
-    /**
-     * @Flow\Inject
-     * @var RouterCachingService
-     */
-    protected $routerCachingService;
 
     /**
      * @Flow\Inject
