@@ -91,8 +91,25 @@ class RedirectService
         if ($statusCode >= 300 && $statusCode <= 399) {
             $location = $redirect->getTargetUriPath();
 
+            // Relative redirects will be turned into absolute redirects
             if (parse_url($location, PHP_URL_SCHEME) === null) {
-                $location = $httpRequest->getBaseUri() . $location;
+                $location = (string)$httpRequest->getUri()->withQuery('')->withFragment('')->withPath($location);
+                $locationParts = parse_url($location);
+                $location = $httpRequest->getUri();
+
+                if (isset($locationParts['path'])) {
+                    $location = $location->withPath($locationParts['path']);
+                }
+
+                if (isset($locationParts['query'])) {
+                    $location = $location->withQuery($locationParts['query']);
+                }
+
+                if (isset($locationParts['fragment'])) {
+                    $location = $location->withFragment($locationParts['fragment']);
+                }
+
+                $location = (string)$location;
             }
 
             $response->setHeaders(new Headers([
