@@ -96,29 +96,29 @@ class RedirectService
         $response = $this->responseFactory->createResponse($statusCode);
 
         if ($statusCode >= 300 && $statusCode <= 399) {
-            $location = $redirect->getTargetUriPath();
+            $targetUri = $redirect->getTargetUriPath();
 
             // Relative redirects will be turned into absolute redirects
-            if (parse_url($location, PHP_URL_SCHEME) === null) {
-                $locationParts = parse_url($location);
-                $location = $httpRequest->getUri();
+            if (parse_url($targetUri, PHP_URL_SCHEME) === null) {
+                $targetUriParts = parse_url($targetUri);
+                $absoluteTargetUri = $httpRequest->getUri();
 
-                if (isset($locationParts['path'])) {
-                    $location = $location->withPath($locationParts['path']);
+                if (isset($targetUriParts['path'])) {
+                    $absoluteTargetUri = $absoluteTargetUri->withPath($targetUriParts['path']);
                 }
 
-                if (isset($locationParts['query'])) {
-                    $location = $location->withQuery($locationParts['query']);
+                if (isset($targetUriParts['query'])) {
+                    $absoluteTargetUri = $absoluteTargetUri->withQuery($targetUriParts['query']);
                 }
 
-                if (isset($locationParts['fragment'])) {
-                    $location = $location->withFragment($locationParts['fragment']);
+                if (isset($targetUriParts['fragment'])) {
+                    $absoluteTargetUri = $absoluteTargetUri->withFragment($targetUriParts['fragment']);
                 }
 
-                $location = (string)$location;
+                $targetUri = (string)$absoluteTargetUri;
             }
 
-            $response = $response->withHeader('Location', $location)
+            $response = $response->withHeader('Location', $targetUri)
                 ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
                 ->withHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
         } elseif ($statusCode >= 400 && $statusCode <= 599) {
