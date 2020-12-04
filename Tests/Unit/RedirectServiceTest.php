@@ -12,7 +12,10 @@ namespace Neos\RedirectHandler\Tests\Unit;
  */
 
 use Doctrine\DBAL\DBALException;
-use Neos\Flow\Mvc\RequestInterface;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Neos\RedirectHandler\Redirect;
 use Neos\RedirectHandler\RedirectService;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
@@ -34,9 +37,19 @@ class RedirectServiceTest extends UnitTestCase
     protected $mockRedirectStorage;
 
     /**
-     * @var RequestInterface
+     * @var ResponseFactoryInterface
+     */
+    protected $mockResponseFactory;
+
+    /**
+     * @var ServerRequestInterface
      */
     protected $mockHttpRequest;
+
+    /**
+     * @var UriInterface
+     */
+    protected $mockUri;
 
     /**
      * Sets up this test case
@@ -49,20 +62,25 @@ class RedirectServiceTest extends UnitTestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->inject($this->redirectService, 'redirectStorage', $this->mockRedirectStorage);
-
-        $this->mockHttpRequest = $this->getMockBuilder(Request::class)
+        $this->mockResponseFactory = $this->getMockBuilder(ResponseFactoryInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mockUri = $this->getMockBuilder(Uri::class)
+        $this->inject($this->redirectService, 'redirectStorage', $this->mockRedirectStorage);
+        $this->inject($this->redirectService, 'responseFactory', $this->mockResponseFactory);
+
+        $this->mockHttpRequest = $this->getMockBuilder(ServerRequestInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->mockUri = $this->getMockBuilder(UriInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $this->mockHttpRequest
             ->expects($this->any())
-            ->method('getBaseUri')
-            ->willReturn($mockUri);
+            ->method('getUri')
+            ->willReturn($this->mockUri);
     }
 
     /**
@@ -70,9 +88,9 @@ class RedirectServiceTest extends UnitTestCase
      */
     public function buildResponseIfApplicableReturnsSilentlyIfRedirectRepositoryThrowsException()
     {
-        $this->mockHttpRequest
+        $this->mockUri
             ->expects($this->atLeastOnce())
-            ->method('getRelativePath')
+            ->method('getPath')
             ->will($this->returnValue('some/relative/path'));
 
         $this->mockRedirectStorage
@@ -88,9 +106,9 @@ class RedirectServiceTest extends UnitTestCase
      */
     public function buildResponseIfApplicableReturnsNullIfNoApplicableRedirectIsFound()
     {
-        $this->mockHttpRequest
+        $this->mockUri
             ->expects(static::atLeastOnce())
-            ->method('getRelativePath')
+            ->method('getPath')
             ->will(static::returnValue('some/relative/path'));
 
         $this->mockRedirectStorage
@@ -107,9 +125,9 @@ class RedirectServiceTest extends UnitTestCase
      */
     public function buildResponseIfApplicableRetunsHttpRequestIfApplicableRedirectIsFound()
     {
-        $this->mockHttpRequest
+        $this->mockUri
             ->expects(static::atLeastOnce())
-            ->method('getRelativePath')
+            ->method('getPath')
             ->willReturn('some/relative/path');
 
         $mockRedirect = $this->getMockBuilder(Redirect::class)
@@ -125,6 +143,12 @@ class RedirectServiceTest extends UnitTestCase
             ->method('getOneBySourceUriPathAndHost')
             ->with('some/relative/path')
             ->willReturn($mockRedirect);
+
+        $this->mockResponseFactory
+            ->expects(static::once())
+            ->method('createResponse')
+            ->with(301)
+            ->willReturn(new Response(301));
 
         $this->inject($this->redirectService, 'redirectStorage', $this->mockRedirectStorage);
 
