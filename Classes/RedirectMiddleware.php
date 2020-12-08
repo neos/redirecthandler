@@ -28,6 +28,15 @@ class RedirectMiddleware implements MiddlewareInterface
      */
     protected $redirectService;
 
+    /**
+     * Checks if the current request has no match from routing but a
+     * matching redirect and build a new response.
+     *
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $next
+     * @return ResponseInterface
+     * @throws Exception
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $next): ResponseInterface
     {
         $routingMatchResults = $request->getAttribute(ServerRequestAttributes::ROUTING_RESULTS);
@@ -35,10 +44,6 @@ class RedirectMiddleware implements MiddlewareInterface
             return $next->handle($request);
         }
         $response = $this->redirectService->buildResponseIfApplicable($request);
-        if ($response !== null) {
-            return $response;
-        } else {
-            return $next->handle($request);
-        }
+        return $response ?? $next->handle($request);
     }
 }
