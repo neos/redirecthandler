@@ -5,7 +5,7 @@ git:
     submodules: false
 matrix:
     include:
-        - php: 7.2
+        - php: 7.3
 
 before_install:
     - export FLOW_TARGET_VERSION=7.0
