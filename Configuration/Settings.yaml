@@ -9,9 +9,7 @@ Neos:
       sourceUriPath: '/^[a-z0-9_\-\/\.]+$/i'
   Flow:
     http:
-      chain:
-        process:
-          chain:
-            redirect:
-              position: 'after routing'
-              component: Neos\RedirectHandler\RedirectComponent
+      middlewares:
+        redirect:
+          position: 'after routing'
+          middleware: 'Neos\RedirectHandler\RedirectMiddleware'
