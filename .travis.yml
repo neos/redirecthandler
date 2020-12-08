@@ -14,7 +14,7 @@ before_install:
     - git clone https://github.com/neos/flow-base-distribution.git -b ${FLOW_TARGET_VERSION}
     - cd flow-base-distribution
     - composer config repositories.redirecthandler path ../redirecthandler
-    - composer require --no-update --no-interaction neos/redirecthandler:"dev-build as 4.0.x-dev"
+    - composer require --no-update --no-interaction neos/redirecthandler:"dev-build as dev-master"
     - composer require --no-update --no-interaction neos/redirecthandler-databasestorage:dev-master
 install:
     - composer install --no-interaction
