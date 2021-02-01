@@ -208,7 +208,7 @@ class RedirectImportService
                         $redirect->getStatusCode(),
                         $redirect->getHost() ?: 'all hosts'
                     ];
-                    $this->logger->error(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LogEnvironment::fromMethodName(__METHOD__));
+                    $this->logger->info(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LogEnvironment::fromMethodName(__METHOD__));
                 }
                 $this->persistenceManager->persistAll();
             } catch (Exception $exception) {
