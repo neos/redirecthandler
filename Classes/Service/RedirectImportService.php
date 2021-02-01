@@ -172,8 +172,16 @@ class RedirectImportService
             foreach ($hosts as $key => $host) {
                 $host = empty($host) ? null : $host;
                 $redirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourceUriPath, $host);
-                $isSame = $this->isSame($sourceUriPath, $targetUriPath, $host, $statusCode, $startDateTime,
-                    $endDateTime, $comment, $redirect);
+                $isSame = $this->isSame(
+                    $sourceUriPath,
+                    $targetUriPath,
+                    $host,
+                    $statusCode,
+                    $startDateTime,
+                    $endDateTime,
+                    $comment,
+                    $redirect
+                );
                 if ($redirect !== null && $isSame === false) {
                     $protocol[] = ['type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_DELETED, 'redirect' => $redirect];
                     $this->redirectStorage->removeOneBySourceUriPathAndHost($sourceUriPath, $host);
@@ -196,9 +204,17 @@ class RedirectImportService
                 // Set creator to current user if the redirect has changed
                 $creator = $currentUserIdentifier;
 
-                $changedRedirects = $this->redirectStorage->addRedirect($sourceUriPath, $targetUriPath, $statusCode,
+                $changedRedirects = $this->redirectStorage->addRedirect(
+                    $sourceUriPath,
+                    $targetUriPath,
+                    $statusCode,
                     $hosts,
-                    $creator, $comment, $type, $startDateTime, $endDateTime);
+                    $creator,
+                    $comment,
+                    $type,
+                    $startDateTime,
+                    $endDateTime
+                );
                 /** @var RedirectInterface $redirect */
                 foreach ($changedRedirects as $redirect) {
                     $protocol[] = ['type' => self::REDIRECT_IMPORT_MESSAGE_TYPE_CREATED, 'redirect' => $redirect];
@@ -208,7 +224,7 @@ class RedirectImportService
                         $redirect->getStatusCode(),
                         $redirect->getHost() ?: 'all hosts'
                     ];
-                    $this->logger->error(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LogEnvironment::fromMethodName(__METHOD__));
+                    $this->logger->info(vsprintf('Redirect import success, sourceUriPath=%s, targetUriPath=%s, statusCode=%d, hosts=%s', $messageArguments), LogEnvironment::fromMethodName(__METHOD__));
                 }
                 $this->persistenceManager->persistAll();
             } catch (Exception $exception) {

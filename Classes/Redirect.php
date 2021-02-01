@@ -152,8 +152,10 @@ class Redirect implements RedirectInterface
         $this->hitCounter = $hitCounter;
         $this->lastHit = $lastHit;
 
-        $this->type = in_array($type,
-            [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]) ? $type : self::REDIRECT_TYPE_GENERATED;
+        $this->type = in_array(
+            $type,
+            [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]
+        ) ? $type : self::REDIRECT_TYPE_GENERATED;
     }
 
     /**
@@ -162,10 +164,21 @@ class Redirect implements RedirectInterface
      */
     public static function create(RedirectInterface $redirect): RedirectInterface
     {
-        return new self($redirect->getSourceUriPath(), $redirect->getTargetUriPath(), $redirect->getStatusCode(),
-            $redirect->getHost(), $redirect->getCreator(), $redirect->getComment(), $redirect->getType(),
-            $redirect->getStartDateTime(), $redirect->getEndDateTime(), $redirect->getCreationDateTime(),
-            $redirect->getLastModificationDateTime(), $redirect->getHitCounter(), $redirect->getLastHit());
+        return new self(
+            $redirect->getSourceUriPath(),
+            $redirect->getTargetUriPath(),
+            $redirect->getStatusCode(),
+            $redirect->getHost(),
+            $redirect->getCreator(),
+            $redirect->getComment(),
+            $redirect->getType(),
+            $redirect->getStartDateTime(),
+            $redirect->getEndDateTime(),
+            $redirect->getCreationDateTime(),
+            $redirect->getLastModificationDateTime(),
+            $redirect->getHitCounter(),
+            $redirect->getLastHit()
+        );
     }
 
     /**
