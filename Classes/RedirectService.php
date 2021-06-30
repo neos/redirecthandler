@@ -100,6 +100,7 @@ class RedirectService
 
             if (parse_url($location, PHP_URL_SCHEME) === null) {
                 $location = $httpRequest->getBaseUri() . $location;
+                $location = urldecode($location);
             }
 
             $response->setHeaders(new Headers([
