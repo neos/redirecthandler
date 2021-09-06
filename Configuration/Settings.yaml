@@ -6,7 +6,7 @@ Neos:
       redirect: 301
       gone: 410
     validation:
-      sourceUriPath: '/^[a-z0-9_\-\/\.]+$/i'
+      sourceUriPath: '/^[a-z0-9_\-\/\.%]+$/i'
   Flow:
     http:
       middlewares:
