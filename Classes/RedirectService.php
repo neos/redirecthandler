@@ -104,6 +104,9 @@ class RedirectService
                 $absoluteTargetUri = $httpRequest->getUri();
 
                 if (isset($targetUriParts['path'])) {
+                    if (substr($targetUriParts['path'], 0, 1) !== '/') {
+                        $targetUriParts['path'] = '/' . $targetUriParts['path'];
+                    }
                     $absoluteTargetUri = $absoluteTargetUri->withPath($targetUriParts['path']);
                 }
 
