@@ -60,12 +60,14 @@ a link.
 
 Override the routing order like this:
 
+```yaml
 Neos:
   Flow:
     http:
       middlewares:
         redirect:
-          position: 'after routing'
+          position: 'before routing'
+```
                   
 Be careful when using this configuration, as this will make the redirect 
 component act first before any other route is resolved and could for 
