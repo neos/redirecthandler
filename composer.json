@@ -4,7 +4,8 @@
     "description": "Basic API to handle HTTP redirects with the Flow Framework",
     "license": "MIT",
     "require": {
-        "neos/flow": "^7.0 || ^8.0 || dev-master",
+        "php": ">=8.2",
+        "neos/flow": "^9.0 || dev-master",
         "neos/redirecthandler-storageimplementation": "~3.0 || dev-master",
         "league/csv": "^9.2",
         "ext-json": "*"
