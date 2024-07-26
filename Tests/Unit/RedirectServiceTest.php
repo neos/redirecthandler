@@ -11,7 +11,6 @@ namespace Neos\RedirectHandler\Tests\Unit;
  * source code.
  */
 
-use Doctrine\DBAL\DBALException;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -96,7 +95,7 @@ class RedirectServiceTest extends UnitTestCase
         $this->mockRedirectStorage
             ->expects(static::atLeastOnce())
             ->method('getOneBySourceUriPathAndHost')
-            ->will($this->throwException(new DBALException()));
+            ->will($this->throwException(new \Exception('Just a test exception in the mockRedicrectStorage.')));
 
         $this->redirectService->buildResponseIfApplicable($this->mockHttpRequest);
     }
