@@ -35,13 +35,13 @@ interface RedirectStorageInterface
     /**
      * Returns all registered redirects matching the given parameters
      *
-     * @param string $host Full qualified host name, a value of `null` will not filter the host and return all
+     * @param string|null $host Full qualified host name, a value of `null` will not filter the host and return all
      * @param bool $onlyActive Filters redirects which start and end datetime don't match the current datetime
      * @param string|null $type Filters redirects by their type
      * @return \Generator<RedirectDto>
      * @api
      */
-    public function getAll(string $host = null, bool $onlyActive = false, ?string $type = null): \Generator;
+    public function getAll(?string $host = null, bool $onlyActive = false, ?string $type = null): \Generator;
 
     /**
      * Returns all registered redirects without a host and matching the given parameters
@@ -93,7 +93,7 @@ interface RedirectStorageInterface
      *
      * @param string $sourceUriPath the relative URI path that should trigger a redirect
      * @param string $targetUriPath the relative URI path the redirect should point to
-     * @param int $statusCode the status code of the redirect header
+     * @param int|null $statusCode the status code of the redirect header
      * @param array $hosts list of full qualified host name
      * @param string|null $creator
      * @param string|null $comment
@@ -106,13 +106,13 @@ interface RedirectStorageInterface
     public function addRedirect(
         string $sourceUriPath,
         string $targetUriPath,
-        int $statusCode = null,
+        ?int $statusCode = null,
         array $hosts = [],
         ?string $creator = null,
         ?string $comment = null,
         ?string $type = null,
-        \DateTime $startDateTime = null,
-        \DateTime $endDateTime = null
+        ?\DateTime $startDateTime = null,
+        ?\DateTime $endDateTime = null
     ): array;
 
     /**
