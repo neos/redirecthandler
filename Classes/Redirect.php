@@ -132,12 +132,12 @@ class Redirect implements RedirectInterface
         ?string $creator = null,
         ?string $comment = null,
         ?string $type = null,
-        \DateTimeInterface $startDateTime = null,
-        \DateTimeInterface $endDateTime = null,
-        \DateTimeInterface $creationDateTime = null,
-        \DateTimeInterface $lastModificationDateTime = null,
+        ?\DateTimeInterface $startDateTime = null,
+        ?\DateTimeInterface $endDateTime = null,
+        ?\DateTimeInterface $creationDateTime = null,
+        ?\DateTimeInterface $lastModificationDateTime = null,
         int $hitCounter = 0,
-        \DateTimeInterface $lastHit = null
+        ?\DateTimeInterface $lastHit = null
     ) {
         $this->sourceUriPath = ltrim($sourceUriPath, '/');
         $this->targetUriPath = ltrim($targetUriPath, '/');

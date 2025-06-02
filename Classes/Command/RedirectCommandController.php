@@ -131,12 +131,12 @@ class RedirectCommandController extends CommandController
      * filename before the export with the optional ``filename`` argument. If no ``filename`` argument is supplied, the
      * export will be returned within the CLI.
      *
-     * @param string $filename (optional) The filename for the CSV file
+     * @param string|null $filename (optional) The filename for the CSV file
      * @param string|null $host (optional) Only export redirects for a specified host
      * @param bool $includeHeader Add line with column names as first line
      * @return void
      */
-    public function exportCommand(string $filename = null, ?string $host = null, bool $includeHeader = true): void
+    public function exportCommand(?string $filename = null, ?string $host = null, bool $includeHeader = true): void
     {
         try {
             $csvWriter = $this->redirectExportService->exportCsv($host, false, null, $includeHeader);
@@ -215,14 +215,14 @@ class RedirectCommandController extends CommandController
     }
 
     /**
-     * @param RedirectInterface $redirect
+     * @param RedirectInterface|null $redirect
      * @param string $sourceUriPath
      * @param string $targetUriPath
      * @param string|null $host
      * @param integer $statusCode
      * @return bool
      */
-    protected function isSame(string $sourceUriPath, string $targetUriPath, ?string $host, int $statusCode, RedirectInterface $redirect = null): bool
+    protected function isSame(string $sourceUriPath, string $targetUriPath, ?string $host, int $statusCode, ?RedirectInterface $redirect = null): bool
     {
         if ($redirect === null) {
             return false;

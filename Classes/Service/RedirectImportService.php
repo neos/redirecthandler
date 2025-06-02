@@ -259,7 +259,7 @@ class RedirectImportService
      * @param \DateTime|null $startDateTime
      * @param \DateTime|null $endDateTime
      * @param string|null $comment
-     * @param RedirectInterface $redirect
+     * @param RedirectInterface|null $redirect
      * @return bool
      */
     protected function isSame(
@@ -270,7 +270,7 @@ class RedirectImportService
         ?\DateTime $startDateTime = null,
         ?\DateTime $endDateTime = null,
         ?string $comment = null,
-        RedirectInterface $redirect = null
+        ?RedirectInterface $redirect = null
     ): bool {
         if ($redirect === null) {
             return false;
