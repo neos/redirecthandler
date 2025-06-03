@@ -288,6 +288,7 @@ class Redirect implements RedirectInterface
     /**
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return [
