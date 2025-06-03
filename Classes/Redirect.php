@@ -288,8 +288,7 @@ class Redirect implements RedirectInterface
     /**
      * @return mixed
      */
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return [
             'host' => $this->getHost(),
