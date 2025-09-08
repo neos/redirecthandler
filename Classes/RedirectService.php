@@ -80,6 +80,30 @@ class RedirectService
         }
     }
 
+	/**
+	 * Replaces template variables in the given query string with corresponding values from the provided array.
+	 *
+	 * This method searches for placeholders in the format `${variable}` within the input query string,
+	 * and replaces them with the values from the `$variables` array that match the variable name.
+	 *
+	 * @param string $queryString The query string containing template variables to be replaced.
+	 * @param array $variables An associative array of variable names and their replacement values.
+	 * @return string The query string with all template variables replaced by their corresponding values.
+	 */
+	private function templateQueryVariables(string $queryString, array $variables): string
+	{
+		$pattern = '/\$\{([^}]+)\}/';
+
+		$output = preg_replace_callback($pattern, function ($m) use ($variables) {
+			$key = $m[1];
+			if(isset($key) && !empty($key) && isset($variables[$key])) {
+				return $variables[$key];
+			}
+		}, $queryString);
+
+		return $output;
+	}
+
     /**
      * @param ServerRequestInterface $httpRequest
      * @param RedirectInterface $redirect
@@ -111,7 +135,9 @@ class RedirectService
                 }
 
                 if (isset($targetUriParts['query'])) {
-                    $absoluteTargetUri = $absoluteTargetUri->withQuery($targetUriParts['query']);
+					$value = $this->templateQueryVariables($targetUriParts['query'], $httpRequest->getQueryParams());
+
+                    $absoluteTargetUri = $absoluteTargetUri->withQuery($value);
                 }
 
                 if (isset($targetUriParts['fragment'])) {
