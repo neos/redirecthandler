@@ -44,7 +44,7 @@ class RedirectExportService
      */
     public function exportCsv(?string $host = null, bool $onlyActive = false, ?string $type = null, bool $includeHeader = true): Writer
     {
-        $writer = Writer::createFromFileObject(new \SplTempFileObject());
+        $writer = Writer::from(new \SplTempFileObject());
         $redirects = $this->getRedirects($host, $onlyActive, $type);
 
         if ($includeHeader) {

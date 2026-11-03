@@ -142,9 +142,9 @@ class RedirectCommandController extends CommandController
             $csvWriter = $this->redirectExportService->exportCsv($host, false, null, $includeHeader);
 
             if ($filename === null) {
-                $csvWriter->output();
+                $csvWriter->download();
             } else {
-                file_put_contents($filename, (string)$csvWriter);
+                file_put_contents($filename, $csvWriter->toString());
             }
         } catch (CannotInsertRecord $e) {
             $this->logger->error(vsprintf('Redirect export error, host=%s', [$host]), LogEnvironment::fromMethodName(__METHOD__));
@@ -180,7 +180,7 @@ class RedirectCommandController extends CommandController
         }
         $this->outputLine('<b>Import redirects from "%s"</b>', [$filename]);
         $this->outputLine();
-        $reader = Reader::createFromPath($filename);
+        $reader = Reader::from($filename);
         $reader->setDelimiter($delimiter);
         $protocol = $this->redirectImportService->import($reader->getIterator());
         foreach ($protocol as $entry) {
